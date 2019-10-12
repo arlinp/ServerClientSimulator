@@ -13,10 +13,10 @@ TARGET_2 = client
 all: $(TARGET_1) $(TARGET_2)
 
 $(TARGET_1): $(TARGET_1).c
-$(CC) $(CFLAGS) -o $(TARGET_1) $(TARGET_1).c
+	$(CC) $(CFLAGS) -o $(TARGET_1) $(TARGET_1).c
 
 $(TARGET_2): $(TARGET_2).c
-$(CC) $(CFLAGS) -o $(TARGET_2) $(TARGET_2).c
+	$(CC) $(CFLAGS) -o $(TARGET_2) $(TARGET_2).c
 
 clean:
-$(RM) $(TARGET_1) $(TARGET_2)
+	$(RM) $(TARGET_1) $(TARGET_2)
