@@ -1,13 +1,17 @@
+#include <arpa/inet.h>
+#include <ctype.h> 
 #include <netdb.h> 
-#include <netinet/in.h> 
+#include <netinet/in.h>
+#include <signal.h>
+#include <string.h>
 #include <stdlib.h> 
-#include <string.h> 
+#include <stdio.h> 
 #include <sys/socket.h> 
 #include <sys/types.h>
-#include <stdio.h> 
+#include <sys/wait.h>
 #include <unistd.h>
-#include <arpa/inet.h> 
-#define MAX 80
+ 
+#define LENGTH 64
 #define MAXLINE 1024
 #define SA struct sockaddr 
 
@@ -108,7 +112,7 @@ int TCP(int port)
     printf("Listen failed...\n"); 
     exit(0); 
   } 
-  else
+  else 
     printf("Server listening..\n"); 
   len = sizeof(cli); 
   
@@ -130,29 +134,31 @@ int TCP(int port)
 
 void func(int sockfd) 
 { 
-    char buff[MAX]; 
-    int n; 
-    // infinite loop for chat 
-    for (;;) { 
-        bzero(buff, MAX); 
-  
-        // read the message from client and copy it in buffer 
-        read(sockfd, buff, sizeof(buff)); 
-        // print buffer which contains the client contents 
-        printf("From client: %s\t To client : ", buff); 
-        bzero(buff, MAX); 
-        n = 0; 
-        // copy server message in the buffer 
-        while ((buff[n++] = getchar()) != '\n') 
-            ; 
-  
-        // and send that buffer to client 
-        write(sockfd, buff, sizeof(buff)); 
-  
-        // if msg contains "Exit" then server exit and chat ended. 
-        if (strncmp("exit", buff, 4) == 0) { 
-            printf("Server Exit...\n"); 
-            break; 
-        } 
-    } 
+  if(!fork()) { //Change fs_name to that of http request file name 
+    char* fs_name = "/home/aryan/Desktop/output.txt";
+    char sdbuf[LENGTH]; // Send buffer
+    printf("[Server] Sending %s to the Client...", fs_name);
+    FILE *fs = fopen(fs_name, "r");
+    if(fs == NULL)
+      {
+	fprintf(stderr, "ERROR: File %s not found on server. (errno = %d)\n", fs_name, h_errno);
+	exit(1);
+      }
+
+    bzero(sdbuf, LENGTH); 
+    int fs_block_sz; 
+    while((fs_block_sz = fread(sdbuf, sizeof(char), LENGTH, fs))>0)
+      {
+	if(send(sockfd, sdbuf, fs_block_sz, 0) < 0)
+	  {
+	    fprintf(stderr, "ERROR: Failed to send file %s. (errno = %d)\n", fs_name, h_errno);
+	    exit(1);
+	  }
+	bzero(sdbuf, LENGTH);
+      }
+    printf("Ok sent to client!\n");
+    close(sockfd);
+    printf("[Server] Connection with Client closed. Server will wait now...\n");
+    while(waitpid(-1, NULL, WNOHANG) > 0);
+  }
 } 
