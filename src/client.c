@@ -8,7 +8,7 @@
 #include <arpa/inet.h> 
 #include <netinet/in.h> 
 
-#define LENGTH 64
+#define LENGTH 32
 #define MAXLINE 1024 
 #define SA struct sockaddr
 

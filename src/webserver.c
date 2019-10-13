@@ -11,8 +11,7 @@
 #include <sys/wait.h>
 #include <unistd.h>
  
-#define LENGTH 64
-#define MAXLINE 1024
+#define LENGTH 32
 #define SA struct sockaddr 
 
 int UDP(int port);
@@ -39,7 +38,7 @@ int main(int argc, char *argv[])
 
 int UDP(int port) { 
   int sockfd; 
-  char buffer[MAXLINE]; 
+  char buffer[LENGTH]; 
   char *hello = "Hello from server"; 
   struct sockaddr_in servaddr, cliaddr; 
       
