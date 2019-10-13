@@ -86,7 +86,8 @@ int UDP(int port, char* address) {
 void func(int sockfd) 
 { 
     char buff[MAX]; 
-    int n; 
+    int n;
+    FILE* temp = fopen("request.html", "w+");
     for (;;) { 
         bzero(buff, sizeof(buff)); 
         //printf("Enter the string : "); 
@@ -96,12 +97,24 @@ void func(int sockfd)
         write(sockfd, buff, sizeof(buff)); 
         bzero(buff, sizeof(buff)); 
         read(sockfd, buff, sizeof(buff)); 
-        printf("From Server : %s", buff); 
+        fwrite(sockfd, buff, sizeof(buff), temp);
+        //printf("From Server : %s", buff); 
         if ((strncmp(buff, "exit", 4)) == 0) { 
             printf("Client Exit...\n"); 
             break; 
         } 
+    }
+
+    // Read contents from file 
+    c = fgetc(temp); 
+    while (c != EOF) 
+    { 
+        printf ("%c", c); 
+        c = fgetc(temp); 
     } 
+  
+    fclose(temp);     
+    return 0;
 } 
   
 int TCP(int port, char* address) 
