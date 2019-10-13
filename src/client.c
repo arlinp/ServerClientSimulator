@@ -89,12 +89,12 @@ void func(int sockfd)
     char buff[MAX]; 
     int n; 
     for (;;) { 
-        bzero(buff, sizeof(buff)); 
-        printf("Enter the string : "); 
-        n = 0; 
-        while ((buff[n++] = getchar()) != '\n') 
-            ; 
-        write(sockfd, buff, sizeof(buff)); 
+        //bzero(buff, sizeof(buff)); 
+        //printf("Enter the string : "); 
+        //n = 0; 
+        //while ((buff[n++] = getchar()) != '\n') 
+        //     ; 
+        //write(sockfd, buff, sizeof(buff)); 
         bzero(buff, sizeof(buff)); 
         read(sockfd, buff, sizeof(buff)); 
         printf("From Server : %s", buff); 
