@@ -88,7 +88,7 @@ int func(int sockfd)
     char buff[MAX];
     char c;
     int n;
-    FILE* temp = fopen("request.html", "w+");
+    printf("From Server : \n"); 
     for (;;) { 
         bzero(buff, sizeof(buff)); 
         //printf("Enter the string : "); 
@@ -105,18 +105,7 @@ int func(int sockfd)
             break; 
         } 
     }
-
-    // Read contents from file 
-    c = fgetc(temp); 
-    while (c != EOF) 
-    { 
-        printf ("%c", c); 
-        c = fgetc(temp); 
-    } 
-  
-    fclose(temp);     
-    return 0;
-} 
+}
   
 int TCP(int port, char* address) 
 { 
