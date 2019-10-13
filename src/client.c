@@ -129,7 +129,7 @@ int TCP(int port, char* address)
   
     // connect the client socket to server socket 
     if (connect(sockfd, (SA*)&servaddr, sizeof(servaddr)) != 0) { 
-        printf("Error: 404 Not Found.\n"); 
+        printf("Error: Failed to connect to server.\n"); 
         exit(0); 
     } 
     else
