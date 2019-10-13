@@ -65,7 +65,7 @@ int UDP(int port) {
     } 
       
   int len, n; 
-  n = recvfrom(sockfd, (char *)buffer, MAXLINE,  
+  n = recvfrom(sockfd, (char *)buffer, LENGTH,  
 	       MSG_WAITALL, ( struct sockaddr *) &cliaddr, 
 	       &len); 
   buffer[n] = '\0'; 
