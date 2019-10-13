@@ -85,7 +85,8 @@ int UDP(int port, char* address) {
 
 int func(int sockfd) 
 { 
-    char buff[MAX]; 
+    char buff[MAX];
+    char c;
     int n;
     FILE* temp = fopen("request.html", "w+");
     for (;;) { 
