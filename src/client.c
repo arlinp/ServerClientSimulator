@@ -7,23 +7,37 @@
 #include <sys/types.h> 
 #include <arpa/inet.h> 
 #include <netinet/in.h> 
-  
+
+#define LENGTH 64
 #define MAXLINE 1024 
 #define MAX 80 
 #define SA struct sockaddr
 
-int TCP();
+int TCP(int port, char* address);
 void func(int sockfd);
-int UDP();
+int UDP(int port, char* address);
   
 // Driver code 
-int main(int argc, char *argv[]) 
-{
+int main(int argc, char *argv[]) {
   if (argc == 3) {
+    int i = 0;
+    int port;
+    char *p = strtok (argv[1], ":");
+    char *array[2];
+
+    while (p != NULL)
+    {
+        array[i++] = p;
+        p = strtok (NULL, ":");
+    }
+    
+    printf("%s\n", array[1]);
+    port = atoi(array[1]);
+
     if (strcmp(argv[2], "TCP") == 0) { 
-      TCP(atoi(argv[1]));
+      TCP(port, array[0]);
     } else if (strcmp(argv[2], "UDP") == 0) { 
-      UDP(atoi(argv[1]));
+      UDP(port, array[0]);
     } else {
       printf("Invalid transport protocol: Expected either TCP or UDP, found %s\n", argv[2]);
       return 0;
@@ -34,7 +48,7 @@ int main(int argc, char *argv[])
   }
 }
 
-int UDP(int port) { 
+int UDP(int port, char* address) { 
     int sockfd; 
     char buffer[MAXLINE]; 
     char* hello = "Hello from client"; 
@@ -50,7 +64,7 @@ int UDP(int port) {
       
     // Filling server information 
     servaddr.sin_family = AF_INET; 
-    servaddr.sin_port = htons(PORT); 
+    servaddr.sin_port = htons(port); 
     servaddr.sin_addr.s_addr = INADDR_ANY; 
       
     int n, len; 
@@ -91,65 +105,66 @@ void func(int sockfd)
     } 
 } 
   
-int TCP(int port) 
+int TCP(int port, char* address) 
 { 
+    printf("%s\n", address);
     /* Variable Definition */
-	int sockfd; 
-	int nsockfd;
-	char revbuf[LENGTH]; 
-	struct sockaddr_in remote_addr;
+    int sockfd; 
+    int nsockfd;
+    char revbuf[LENGTH]; 
+    struct sockaddr_in remote_addr;
 
-	/* Get the Socket file descriptor */
-	if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) == -1)
-	{
-	  fprintf(stderr, "ERROR: Failed to obtain Socket Descriptor. (errno = %d)\n",errno);
-	  exit(1);
-	}
-    
+    /* Get the Socket file descriptor 
+    if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) == -1)
+    {
+      fprintf(stderr, "ERROR: Failed to obtain Socket Descriptor. (errno = %d)\n",errno);
+      exit(1);
+    }
+    */
     /* Fill the socket address struct */
-	remote_addr.sin_family = AF_INET; 
-	remote_addr.sin_port = htons(PORT); 
-	inet_pton(AF_INET, "127.0.0.1", &remote_addr.sin_addr); 
-	bzero(&(remote_addr.sin_zero), 8);
+    remote_addr.sin_family = AF_INET; 
+    remote_addr.sin_port = htons(port); 
+    inet_pton(AF_INET, address, &remote_addr.sin_addr); 
+    bzero(&(remote_addr.sin_zero), 8);
   
     /* Try to connect the remote */
-	if (connect(sockfd, (struct sockaddr *)&remote_addr, sizeof(struct sockaddr)) == -1){
-	    error("ERROR: Failed to connect to the host.\n");
-	}
-	else
-	  printf("Client connected to server at port %d...\n", PORT);
+    if (connect(sockfd, (struct sockaddr *)&remote_addr, sizeof(struct sockaddr)) == -1){
+        error("ERROR: Failed to connect to the host.\n");
+    }
+    else
+      printf("Client connected to server at port %d...\n", port);
 
 /*adsfasd
-	printf("Client receiving file from Server...");
-	FILE *fr = fopen("./lab2.html", "a");
-	if{
-	    bzero(revbuf, LENGTH); 
-	    int fr_block_sz = 0;
-	    int success = 0;
-	    //while(success == 0)
-	    //{
-	        while(fr_block_sz = recv(sockfd, revbuf, LENGTH, 0)){
-	            if(fr_block_sz < 0){
-	                error("Receive file error.\n");
-	            }
-	            int write_sz = fwrite(revbuf, sizeof(char), fr_block_sz, fr);
-	            if(write_sz < fr_block_sz){
-	                error("File write failed.\n");
-	            }
-				else if(fr_block_sz){
-					break;
-				}
-	            bzero(revbuf, LENGTH);
-	        }
-	        printf("Ok!\n");
-	        success = 1;
-	        fclose(fr);
-	    //}
-	}
+    printf("Client receiving file from Server...");
+    FILE *fr = fopen("./lab2.html", "a");
+    if{
+        bzero(revbuf, LENGTH); 
+        int fr_block_sz = 0;
+        int success = 0;
+        //while(success == 0)
+        //{
+            while(fr_block_sz = recv(sockfd, revbuf, LENGTH, 0)){
+                if(fr_block_sz < 0){
+                    error("Receive file error.\n");
+                }
+                int write_sz = fwrite(revbuf, sizeof(char), fr_block_sz, fr);
+                if(write_sz < fr_block_sz){
+                    error("File write failed.\n");
+                }
+                else if(fr_block_sz){
+                    break;
+                }
+                bzero(revbuf, LENGTH);
+            }
+            printf("Ok!\n");
+            success = 1;
+            fclose(fr);
+        //}
+    }
     else(fr == NULL) printf("404 Not Found.\n");
     */
-	close (sockfd);
-	printf("Client connection lost.\n");
-	return (0);
+    close (sockfd);
+    printf("Client connection lost.\n");
+    return (0);
         
 }
