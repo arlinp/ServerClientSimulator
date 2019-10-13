@@ -10,7 +10,6 @@
 
 #define LENGTH 64
 #define MAXLINE 1024 
-#define MAX 80 
 #define SA struct sockaddr
 
 int TCP(int port, char* address);
@@ -85,7 +84,7 @@ int UDP(int port, char* address) {
 
 int func(int sockfd) 
 { 
-    char buff[MAX];
+    char buff[LENGTH];
     char c;
     int n;
     printf("From Server : \n"); 
