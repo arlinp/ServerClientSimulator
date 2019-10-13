@@ -10,7 +10,7 @@
 
 #define LENGTH 64
 #define MAXLINE 1024 
-#define MAX 80 
+#define MAX 64 
 #define SA struct sockaddr
 
 int TCP(int port, char* address);
@@ -98,8 +98,8 @@ int func(int sockfd)
         write(sockfd, buff, sizeof(buff)); 
         bzero(buff, sizeof(buff)); 
         read(sockfd, buff, sizeof(buff)); 
-        fwrite(buff, sizeof(buff), 1, temp);
-        //printf("From Server : %s", buff); 
+        //fwrite(buff, sizeof(buff), 1, temp);
+        printf("From Server : %s", buff); 
         if ((strncmp(buff, "exit", 4)) == 0) { 
             printf("Client Exit...\n"); 
             break; 
