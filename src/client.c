@@ -99,7 +99,7 @@ int func(int sockfd)
         bzero(buff, sizeof(buff)); 
         read(sockfd, buff, sizeof(buff)); 
         //fwrite(buff, sizeof(buff), 1, temp);
-        printf("From Server : %s", buff); 
+        printf("%s", buff); 
         if ((strncmp(buff, "exit", 4)) == 0) { 
             printf("Client Exit...\n"); 
             break; 
