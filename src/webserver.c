@@ -117,17 +117,18 @@ int TCP(int port)
   len = sizeof(cli); 
   
   // Accept the data packet from client and verification 
-  connfd = accept(sockfd, (SA*)&cli, &len); 
-  if (connfd < 0) { 
-    printf("server acccept failed...\n"); 
-    exit(0); 
-  } 
-  else
-    printf("server acccept the client...\n"); 
+  for(;;) {
+    connfd = accept(sockfd, (SA*)&cli, &len); 
+    if (connfd < 0) { 
+      printf("server acccept failed...\n"); 
+      exit(0); 
+    } 
+    else
+      printf("server acccept the client...\n"); 
   
-  // Function for chatting between client and server 
-  func(connfd); 
-  
+    // Function for chatting between client and server 
+    func(connfd); 
+  }
   // After chatting close the socket 
   close(sockfd); 
 }
