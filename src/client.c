@@ -14,7 +14,7 @@
 #define SA struct sockaddr
 
 int TCP(int port, char* address);
-void func(int sockfd);
+int func(int sockfd);
 int UDP(int port, char* address);
   
 // Driver code 
@@ -83,7 +83,7 @@ int UDP(int port, char* address) {
     return 0; 
 } 
 
-void func(int sockfd) 
+int func(int sockfd) 
 { 
     char buff[MAX]; 
     int n;
@@ -97,7 +97,7 @@ void func(int sockfd)
         write(sockfd, buff, sizeof(buff)); 
         bzero(buff, sizeof(buff)); 
         read(sockfd, buff, sizeof(buff)); 
-        fwrite(sockfd, buff, sizeof(buff), temp);
+        fwrite(buff, sizeof(buff), 1, temp);
         //printf("From Server : %s", buff); 
         if ((strncmp(buff, "exit", 4)) == 0) { 
             printf("Client Exit...\n"); 
