@@ -132,30 +132,26 @@ int TCP(int port)
   close(sockfd); 
 }
 
-void func(int sockfd) 
-{ 
-  if(!fork()) { //Change fs_name to that of http request file name 
-    char* fs_name = "/home/aryan/Desktop/output.txt";
-    char sdbuf[LENGTH]; // Send buffer
-    printf("[Server] Sending %s to the Client...", fs_name);
-    FILE *fs = fopen(fs_name, "r");
-    if(fs == NULL)
-      {
-	fprintf(stderr, "ERROR: File %s not found on server. (errno = %d)\n", fs_name, h_errno);
-	exit(1);
-      }
+void func(int sockfd){ 
+    if(!fork()) { //Change fs_name to that of http request file name 
+        char* fs_name = "lab2.html";
+        char sdbuf[LENGTH]; // Send buffer
+        printf("[Server] Sending %s to the Client...", fs_name);
+        FILE *fs = fopen(fs_name, "r");
+        if(fs == NULL){
+	          fprintf(stderr, "ERROR: File %s not found on server. (errno = %d)\n", fs_name, h_errno);
+	          exit(1);
+        }
 
-    bzero(sdbuf, LENGTH); 
-    int fs_block_sz; 
-    while((fs_block_sz = fread(sdbuf, sizeof(char), LENGTH, fs))>0)
-      {
-	if(send(sockfd, sdbuf, fs_block_sz, 0) < 0)
-	  {
-	    fprintf(stderr, "ERROR: Failed to send file %s. (errno = %d)\n", fs_name, h_errno);
-	    exit(1);
-	  }
-	bzero(sdbuf, LENGTH);
-      }
+        bzero(sdbuf, LENGTH); 
+        int fs_block_sz; 
+        while((fs_block_sz = fread(sdbuf, sizeof(char), LENGTH, fs))>0){
+	          if(send(sockfd, sdbuf, fs_block_sz, 0) < 0){
+	              fprintf(stderr, "ERROR: Failed to send file %s. (errno = %d)\n", fs_name, h_errno);
+	              exit(1);
+	      }
+	      bzero(sdbuf, LENGTH);
+    }
     printf("Ok sent to client!\n");
     close(sockfd);
     printf("[Server] Connection with Client closed. Server will wait now...\n");
