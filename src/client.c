@@ -8,7 +8,7 @@
 #include <arpa/inet.h> 
 #include <netinet/in.h> 
 
-#define LENGTH 32
+#define LENGTH 64
 #define MAXLINE 1024 
 #define SA struct sockaddr
 
@@ -87,23 +87,28 @@ int func(int sockfd)
     char buff[LENGTH];
     char c;
     int n;
-    printf("From Server : \n"); 
+    printf("From Server : \n");
+    // bzero(buff, sizeof(buff));
     for (;;) { 
-        bzero(buff, sizeof(buff)); 
+      bzero(buff, LENGTH); 
         //printf("Enter the string : "); 
         //n = 0; 
         //while ((buff[n++] = getchar()) != '\n') 
         //     ; 
-        write(sockfd, buff, sizeof(buff)); 
-        bzero(buff, sizeof(buff)); 
-        read(sockfd, buff, sizeof(buff)); 
+        //write(sockfd, buff, sizeof(buff)); 
+        
+        read(sockfd, buff, LENGTH);
+	
+	 
         //fwrite(buff, sizeof(buff), 1, temp);
-        printf("%s", buff); 
+        buff[LENGTH] = 0;
+	printf("%s", buff);
         if ((strncmp(buff, "exit", 4)) == 0) { 
             printf("Client Exit...\n"); 
             break; 
         } 
     }
+    
 }
   
 int TCP(int port, char* address) 

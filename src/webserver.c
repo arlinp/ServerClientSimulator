@@ -11,7 +11,7 @@
 #include <sys/wait.h>
 #include <unistd.h>
  
-#define LENGTH 32
+#define LENGTH 64
 #define SA struct sockaddr 
 
 int UDP(int port);
