@@ -139,7 +139,7 @@ void func(int sockfd){
         printf("[Server] Sending %s to Client...", fs_name);
         FILE *fs = fopen(fs_name, "r");
         if(fs == NULL){
-	          fprintf(stderr, "ERROR: 404 Not Found. (errno = %d)\n", fs_name, h_errno);
+	          fprintf(stderr, "ERROR: 404 Not Found. (errno = %d)\n", h_errno);
 	          exit(1);
         }
 
