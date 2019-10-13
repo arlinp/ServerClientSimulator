@@ -10,7 +10,7 @@
 
 #define LENGTH 64
 #define MAXLINE 1024 
-#define MAX 64 
+#define MAX 80 
 #define SA struct sockaddr
 
 int TCP(int port, char* address);
