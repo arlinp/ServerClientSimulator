@@ -108,31 +108,38 @@ void func(int sockfd)
 int TCP(int port, char* address) 
 { 
     printf("%s\n", address);
-    /* Variable Definition */
-    int sockfd; 
-    int nsockfd;
-    char revbuf[LENGTH]; 
-    struct sockaddr_in remote_addr;
-
-    /* Get the Socket file descriptor 
-    if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) == -1)
-    {
-      fprintf(stderr, "ERROR: Failed to obtain Socket Descriptor. (errno = %d)\n",errno);
-      exit(1);
-    }
-    */
-    /* Fill the socket address struct */
-    remote_addr.sin_family = AF_INET; 
-    remote_addr.sin_port = htons(port); 
-    inet_pton(AF_INET, address, &remote_addr.sin_addr); 
-    bzero(&(remote_addr.sin_zero), 8);
+    int sockfd, connfd; 
+    struct sockaddr_in servaddr, cli; 
   
-    /* Try to connect the remote */
-    if (connect(sockfd, (struct sockaddr *)&remote_addr, sizeof(struct sockaddr)) == -1){
-        error("ERROR: Failed to connect to the host.\n");
-    }
+    // socket create and varification 
+    sockfd = socket(AF_INET, SOCK_STREAM, 0); 
+    if (sockfd == -1) { 
+        printf("socket creation failed...\n"); 
+        exit(0); 
+    } 
     else
-      printf("Client connected to server at port %d...\n", port);
+        printf("Socket successfully created..\n"); 
+
+    bzero(&servaddr, sizeof(servaddr)); 
+  
+    // assign IP, PORT 
+    servaddr.sin_family = AF_INET; 
+    servaddr.sin_addr.s_addr = inet_addr(address); 
+    servaddr.sin_port = htons(port); 
+  
+    // connect the client socket to server socket 
+    if (connect(sockfd, (SA*)&servaddr, sizeof(servaddr)) != 0) { 
+        printf("connection with the server failed...\n"); 
+        exit(0); 
+    } 
+    else
+        printf("connected to the server..\n"); 
+  
+    // function for chat 
+    func(sockfd); 
+  
+    // close the socket 
+    close(sockfd); 
 
 /*adsfasd
     printf("Client receiving file from Server...");
@@ -163,8 +170,6 @@ int TCP(int port, char* address)
     }
     else(fr == NULL) printf("404 Not Found.\n");
     */
-    close (sockfd);
     printf("Client connection lost.\n");
     return (0);
-        
 }
