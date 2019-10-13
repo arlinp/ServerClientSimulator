@@ -136,10 +136,10 @@ void func(int sockfd){
     if(!fork()) { //Change fs_name to that of http request file name 
         char* fs_name = "lab2.html";
         char sdbuf[LENGTH]; // Send buffer
-        printf("[Server] Sending %s to the Client...", fs_name);
+        printf("[Server] Sending %s to Client...", fs_name);
         FILE *fs = fopen(fs_name, "r");
         if(fs == NULL){
-	          fprintf(stderr, "ERROR: File %s not found on server. (errno = %d)\n", fs_name, h_errno);
+	          fprintf(stderr, "ERROR: 404 Not Found. (errno = %d)\n", fs_name, h_errno);
 	          exit(1);
         }
 

@@ -56,7 +56,7 @@ int UDP(int port, char* address) {
   
     // Creating socket file descriptor 
     if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0 ) { 
-        perror("socket creation failed"); 
+        perror("Error: 404 Not Found."); 
         exit(EXIT_FAILURE); 
     } 
   
@@ -114,7 +114,7 @@ int TCP(int port, char* address)
     // socket create and varification 
     sockfd = socket(AF_INET, SOCK_STREAM, 0); 
     if (sockfd == -1) { 
-        printf("socket creation failed...\n"); 
+        printf("Error: Failed to establish socket.\n"); 
         exit(0); 
     } 
     else
@@ -129,11 +129,11 @@ int TCP(int port, char* address)
   
     // connect the client socket to server socket 
     if (connect(sockfd, (SA*)&servaddr, sizeof(servaddr)) != 0) { 
-        printf("connection with the server failed...\n"); 
+        printf("Error: 404 Not Found.\n"); 
         exit(0); 
     } 
     else
-        printf("connected to the server..\n"); 
+        printf("Connected to the server..\n"); 
   
     // function for chat 
     func(sockfd); 
@@ -142,14 +142,12 @@ int TCP(int port, char* address)
     close(sockfd); 
 
 /*adsfasd
-    printf("Client receiving file from Server...");
     FILE *fr = fopen("./lab2.html", "a");
     if{
         bzero(revbuf, LENGTH); 
         int fr_block_sz = 0;
         int success = 0;
-        //while(success == 0)
-        //{
+        //while(success == 0){
             while(fr_block_sz = recv(sockfd, revbuf, LENGTH, 0)){
                 if(fr_block_sz < 0){
                     error("Receive file error.\n");
