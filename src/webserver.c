@@ -70,11 +70,15 @@ int UDP(int port) {
   
   if(!fork()) { //Change fs_name to that of http request file name 
     char* fs_name = "lab2.html";
+<<<<<<< HEAD
     char sdbuf[LENGTH] = '0';
+=======
+    char sdbuf[LENGTH];
+>>>>>>> 3f9533cdf45107e31af6b7e6c20c3dadec59d990
     printf("[Server] Sending %s to Client...", fs_name);
     FILE *fs = fopen(fs_name, "r");
     if(fs == NULL){
-      fprintf(stderr, "ERROR: 404 Not Found. (errno = %d)\n", h_errno);
+      printf("ERROR: 404 Not Found.\n");
       exit(1);
     }
 
@@ -82,8 +86,13 @@ int UDP(int port) {
     int fs_block_sz;
     int len;
     while((fs_block_sz = fread(sdbuf, sizeof(char), LENGTH, fs))>0){
+<<<<<<< HEAD
       if(sendto(sockfd, sdbuf, LENGTH, MSG_CONFIRM, (const struct sockaddr *) &cliaddr, len) < 0){
 	fprintf(stderr, "ERROR: Failed to send file %s. (errno = %d)\n", fs_name, h_errno);
+=======
+      if(sendto(sockfd, sdbuf, fs_block_sz, 0) < 0){
+	fprintf(stderr, "ERROR: Failed to send file %s.\n", fs_name);
+>>>>>>> 3f9533cdf45107e31af6b7e6c20c3dadec59d990
 	exit(1);
       }
       bzero(sdbuf, LENGTH);
@@ -156,7 +165,7 @@ void func(int sockfd){
         printf("[Server] Sending %s to Client...", fs_name);
         FILE *fs = fopen(fs_name, "r");
         if(fs == NULL){
-	          fprintf(stderr, "ERROR: 404 Not Found. (errno = %d)\n", h_errno);
+	          printf("ERROR: 404 Not Found.\n");
 	          exit(1);
         }
 
@@ -164,7 +173,7 @@ void func(int sockfd){
         int fs_block_sz; 
         while((fs_block_sz = fread(sdbuf, sizeof(char), LENGTH, fs))>0){
 	          if(send(sockfd, sdbuf, fs_block_sz, 0) < 0){
-	              fprintf(stderr, "ERROR: Failed to send file %s. (errno = %d)\n", fs_name, h_errno);
+	              printf("ERROR: Failed to send file %s.", fs_name);
 	              exit(1);
 	      }
 	      bzero(sdbuf, LENGTH);
