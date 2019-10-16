@@ -70,7 +70,7 @@ int UDP(int port) {
   
   if(!fork()) { //Change fs_name to that of http request file name 
     char* fs_name = "lab2.html";
-    char sdbuf[LENGTH] = '\0';
+    char sdbuf[LENGTH] = '0';
     printf("[Server] Sending %s to Client...", fs_name);
     FILE *fs = fopen(fs_name, "r");
     if(fs == NULL){
@@ -79,9 +79,10 @@ int UDP(int port) {
     }
 
     bzero(sdbuf, LENGTH);
-    int fs_block_sz; 
+    int fs_block_sz;
+    int len;
     while((fs_block_sz = fread(sdbuf, sizeof(char), LENGTH, fs))>0){
-      if(sendto(sockfd, sdbuf, fs_block_sz, 0) < 0){
+      if(sendto(sockfd, sdbuf, LENGTH, MSG_CONFIRM, (const struct sockaddr *) &cliaddr, len) < 0){
 	fprintf(stderr, "ERROR: Failed to send file %s. (errno = %d)\n", fs_name, h_errno);
 	exit(1);
       }
