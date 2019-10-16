@@ -81,11 +81,13 @@ int UDP(int port) {
     bzero(sdbuf, LENGTH);
     int fs_block_sz;
     int len, n;
-    n = recvfrom(sockfd, (char *)buffer, LENGTH,
-		 0, ( struct sockaddr *) &cliaddr,
-		 &len);
+    /*n = recvfrom(sockfd, (char *)buffer, LENGTH,
+    		 0, ( struct sockaddr *) &cliaddr,
+		 &len);*/
     while((fs_block_sz = fread(sdbuf, sizeof(char), LENGTH, fs))>0){
-      if(sendto(sockfd, sdbuf, LENGTH, 0, (const struct sockaddr *) &cliaddr, len) < 0){
+      if((sendto(sockfd, sdbuf, LENGTH, 0, (const struct sockaddr *) &cliaddr, len) &&recvfrom(sockfd, (char *)buffer, LENGTH,
+											       0, ( struct sockaddr *) &cliaddr,
+											       &len))< 0){
 	printf("ERROR: Failed to send file %s.\n", fs_name);
       }
       bzero(sdbuf, LENGTH);
