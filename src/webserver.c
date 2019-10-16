@@ -70,6 +70,7 @@ int UDP(int port) {
   
   if(!fork()) { //Change fs_name to that of http request file name 
     char* fs_name = "lab2.html";
+    char sdbuf[LENGTH];
     printf("[Server] Sending %s to Client...", fs_name);
     FILE *fs = fopen(fs_name, "r");
     if(fs == NULL){
