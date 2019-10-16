@@ -102,7 +102,7 @@ int func(int sockfd)
 	 
         //fwrite(buff, sizeof(buff), 1, temp);
         buff[LENGTH] = 0;
-	printf("%s", buff);
+	    printf("%s", buff);
         if ((strncmp(buff, "exit", 4)) == 0) { 
             printf("Client Exit...\n"); 
             break; 
