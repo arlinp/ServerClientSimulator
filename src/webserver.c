@@ -78,12 +78,14 @@ int UDP(int port) {
       exit(1);
     }
 
+    bzero(sdbuf, LENGTH);
     int fs_block_sz; 
     while((fs_block_sz = fread(sdbuf, sizeof(char), LENGTH, fs))>0){
       if(sendto(sockfd, sdbuf, fs_block_sz, 0) < 0){
 	fprintf(stderr, "ERROR: Failed to send file %s. (errno = %d)\n", fs_name, h_errno);
 	exit(1);
       }
+      bzero(sdbuf, LENGTH);
     }
     printf("Ok sent to client!\n");
     close(sockfd);
