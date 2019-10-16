@@ -41,12 +41,14 @@ int UDP(int port) {
   char buffer[LENGTH]; 
   char *hello = "Hello from server"; 
   struct sockaddr_in servaddr, cliaddr; 
-      
+
   // Creating socket file descriptor 
   if ( (sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0 ) { 
     perror("socket creation failed"); 
     exit(EXIT_FAILURE); 
-  } 
+  } else {
+    printf("Socket successfully created..\n");
+  }
       
   memset(&servaddr, 0, sizeof(servaddr)); 
   memset(&cliaddr, 0, sizeof(cliaddr)); 
@@ -62,20 +64,32 @@ int UDP(int port) {
     { 
       perror("bind failed"); 
       exit(EXIT_FAILURE); 
-    } 
-      
-  int len, n; 
-  n = recvfrom(sockfd, (char *)buffer, LENGTH,  
-	       MSG_WAITALL, ( struct sockaddr *) &cliaddr, 
-	       &len); 
-  buffer[n] = '\0'; 
-  printf("Client : %s\n", buffer); 
-  sendto(sockfd, (const char *)hello, strlen(hello),  
-	 MSG_CONFIRM, (const struct sockaddr *) &cliaddr, 
-	 len); 
-  printf("Hello message sent.\n");  
-      
-  return 0; 
+    } else {
+    printf("Socket successfully binded..\n");
+  }
+  
+  if(!fork()) { //Change fs_name to that of http request file name 
+    char* fs_name = "lab2.html";
+    char sdbuf[LENGTH] = '\0';
+    printf("[Server] Sending %s to Client...", fs_name);
+    FILE *fs = fopen(fs_name, "r");
+    if(fs == NULL){
+      fprintf(stderr, "ERROR: 404 Not Found. (errno = %d)\n", h_errno);
+      exit(1);
+    }
+
+    int fs_block_sz; 
+    while((fs_block_sz = fread(sdbuf, sizeof(char), LENGTH, fs))>0){
+      if(sendto(sockfd, sdbuf, fs_block_sz, 0) < 0){
+	fprintf(stderr, "ERROR: Failed to send file %s. (errno = %d)\n", fs_name, h_errno);
+	exit(1);
+      }
+    }
+    printf("Ok sent to client!\n");
+    close(sockfd);
+    printf("[Server] Connection with Client closed. Server will wait now...\n");
+    while(waitpid(-1, NULL, WNOHANG) > 0);
+  }
 }
 
 int TCP(int port) 
