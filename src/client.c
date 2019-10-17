@@ -98,11 +98,6 @@ int UDP(int port, char* address) {
                 MSG_WAITALL, (struct sockaddr*) &servaddr, 
                 &len); 
             printf("%s", buffer);
-  
-            // process 
-            if (recvFile(buffer, MAXLINE)) { 
-                break; 
-            } 
         } 
         printf("\n-------------------------------\n"); 
     } 
