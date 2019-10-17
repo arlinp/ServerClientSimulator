@@ -39,147 +39,156 @@ int main(int argc, char *argv[])
 int UDP(int port) {
 
   int sockfd, nBytes; 
-    struct sockaddr_in addr_con; 
-    int addrlen = sizeof(addr_con); 
-    addr_con.sin_family = AF_INET; 
-    addr_con.sin_port = htons(port); 
-    addr_con.sin_addr.s_addr = INADDR_ANY; 
-    char net_buf[LENGTH]; 
-    FILE* fp; 
+  struct sockaddr_in addr_con; 
+  int addrlen = sizeof(addr_con); 
+  addr_con.sin_family = AF_INET; 
+  addr_con.sin_port = htons(port); 
+  addr_con.sin_addr.s_addr = INADDR_ANY; 
+  char sdbuf[LENGTH]; 
+  FILE* fp; 
   
-    // socket() 
-    sockfd = socket(AF_INET, SOCK_DGRAM, 0); 
+  // socket() 
+  sockfd = socket(AF_INET, SOCK_DGRAM, 0); 
   
-    if (sockfd < 0) 
-        printf("\nfile descriptor not received!!\n"); 
+  if (sockfd < 0) 
+    printf("\nfile descriptor not received!!\n"); 
+  else
+    printf("\nfile descriptor %d received\n", sockfd); 
+  
+  // bind() 
+  if (bind(sockfd, (struct sockaddr*)&addr_con, sizeof(addr_con)) == 0) 
+    printf("\nSuccessfully binded!\n"); 
+  else
+    printf("\nBinding Failed!\n"); 
+  
+  while (1) { 
+    printf("\nWaiting for file name...\n"); 
+  
+    // receive file name 
+    bzero(sdbuf, LENGTH);
+  
+    nBytes = recvfrom(sockfd, sdbuf, 
+		      LENGTH, 0, 
+		      (struct sockaddr*)&addr_con, &addrlen); 
+  
+    //fp = fopen(sdbuf, "r");
+    char* fs_name = "lab2.html";
+    printf("\nFile Name Received: %s\n", sdbuf);
+    FILE *fs = fopen(fs_name, "r");
+    if (fp == NULL) 
+      printf("\nFile open failed!\n"); 
     else
-        printf("\nfile descriptor %d received\n", sockfd); 
+      printf("\nFile Successfully opened!\n"); 
   
-    // bind() 
-    if (bind(sockfd, (struct sockaddr*)&addr_con, sizeof(addr_con)) == 0) 
-        printf("\nSuccessfully binded!\n"); 
-    else
-        printf("\nBinding Failed!\n"); 
+    /*while (1) { 
   
-    while (1) { 
-        printf("\nWaiting for file name...\n"); 
-  
-        // receive file name 
-        bzero(sdbuf, LENGTH);
-  
-        nBytes = recvfrom(sockfd, sdbuf, 
-                          LENGTH, 0, 
-                          (struct sockaddr*)&addr_con, &addrlen); 
-  
-        fp = fopen(sdbuf, "r"); 
-        printf("\nFile Name Received: %s\n", sdbuf); 
-        if (fp == NULL) 
-            printf("\nFile open failed!\n"); 
-        else
-            printf("\nFile Successfully opened!\n"); 
-  
-        while (1) { 
-  
-            // process 
-            if (sendFile(fp, sdbuf, LENGTH)) { 
-                sendto(sockfd, sdbuf, LENGTH, 
-                       sendrecvflag,  
-                    (struct sockaddr*)&addr_con, addrlen); 
-                break; 
-            } 
-  
-            // send 
-            sendto(sockfd, sdbuf, LENGTH, 
-                   sendrecvflag, 
-                (struct sockaddr*)&addr_con, addrlen); 
-            clearBuf(sdbuf); 
-        } 
-        if (fp != NULL) 
-            fclose(fp); 
+    // process 
+    if (sendFile(fp, sdbuf, LENGTH)) { 
+    sendto(sockfd, sdbuf, LENGTH, 
+    sendrecvflag,  
+    (struct sockaddr*)&addr_con, addrlen); 
+    break; 
     } 
-    return 0; 
+  
+    // send 
+    sendto(sockfd, sdbuf, LENGTH, 
+    sendrecvflag, 
+    (struct sockaddr*)&addr_con, addrlen); 
+    clearBuf(sdbuf); 
+    } */
+    int fs_block_sz; 
+    while((fs_block_sz = fread(sdbuf, sizeof(char), LENGTH, fs))>0){
+      if(sendto(sockfd, sdbuf, LENGTH, 
+		0,  
+		(struct sockaddr*)&addr_con, addrlen) < 0){
+	printf("ERROR: Failed to send file %s.\n", fs_name);
+      }
+      if (fp != NULL) 
+	fclose(fp); 
+    }
+  }
   
   /*int sockfd;
-  char buffer[LENGTH]; 
-  char *hello = "Hello from server"; 
-  struct sockaddr_in servaddr, cliaddr;
-  int len = sizeof(servaddr);
+    char buffer[LENGTH]; 
+    char *hello = "Hello from server"; 
+    struct sockaddr_in servaddr, cliaddr;
+    int len = sizeof(servaddr);
   
-  // Creating socket file descriptor 
-  if ( (sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0 ) { 
+    // Creating socket file descriptor 
+    if ( (sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0 ) { 
     perror("socket creation failed"); 
     exit(EXIT_FAILURE); 
-  } else {
+    } else {
     printf("Socket successfully created..\n");
-  }
+    }
       
-  memset(&servaddr, 0, sizeof(servaddr)); 
-  memset(&cliaddr, 0, sizeof(cliaddr)); 
+    memset(&servaddr, 0, sizeof(servaddr)); 
+    memset(&cliaddr, 0, sizeof(cliaddr)); 
       
-  // Filling server information 
-  servaddr.sin_family    = AF_INET; // IPv4 
-  servaddr.sin_addr.s_addr = INADDR_ANY; 
-  servaddr.sin_port = htons(port); 
+    // Filling server information 
+    servaddr.sin_family    = AF_INET; // IPv4 
+    servaddr.sin_addr.s_addr = INADDR_ANY; 
+    servaddr.sin_port = htons(port); 
       
-  // Bind the socket with the server address 
-  if ( bind(sockfd, (const struct sockaddr *)&servaddr,  
-            sizeof(servaddr)) < 0 ) 
+    // Bind the socket with the server address 
+    if ( bind(sockfd, (const struct sockaddr *)&servaddr,  
+    sizeof(servaddr)) < 0 ) 
     { 
-      perror("bind failed"); 
-      exit(EXIT_FAILURE); 
+    perror("bind failed"); 
+    exit(EXIT_FAILURE); 
     } else {
     printf("Socket successfully binded..\n");
-  }
+    }
   
-  if(!fork()) { //Change fs_name to that of http request file name 
+    if(!fork()) { //Change fs_name to that of http request file name 
     char* fs_name = "lab2.html";
     char sdbuf[LENGTH];
     printf("[Server] Sending %s to Client...", fs_name);
     //FILE *fs = fopen(fs_name, "r");
     /*if(fs == NULL){
-      printf("ERROR: 404 Not Found.\n");
-      exit(1);
-      }
+    printf("ERROR: 404 Not Found.\n");
+    exit(1);
+    }
 
     bzero(sdbuf, LENGTH);
     int fs_block_sz, nBytes;
     int n;
     /*n = recvfrom(sockfd, (char *)buffer, LENGTH,
-    		 0, ( struct sockaddr *) &cliaddr,
-		 &len);
+    0, ( struct sockaddr *) &cliaddr,
+    &len);
     while(1){
-      printf("\nWaiting for file name...\n");
+    printf("\nWaiting for file name...\n");
 
-      // receive file name
-      bzero(sdbuf, LENGTH);
+    // receive file name
+    bzero(sdbuf, LENGTH);
       
-      nBytes = recvfrom(sockfd, sdbuf,
-			LENGTH, 0,
-			(const struct sockaddr*)&cliaddr, &len);
+    nBytes = recvfrom(sockfd, sdbuf,
+    LENGTH, 0,
+    (const struct sockaddr*)&cliaddr, &len);
 
-      FILE fs = fopen(fs_name, "r");
-      printf("\nFile Name Received: %s\n", sdbuf);
-      if (fs == NULL){
-	printf("\nFile open failed!\n");
-      }else{
-	printf("\nFile Successfully opened!\n");
-      }
-      while((fs_block_sz = fread(sdbuf, sizeof(char), LENGTH, fs))>0){
-      if(sendto(sockfd, sdbuf, LENGTH, 0, (const struct sockaddr *) &cliaddr, len) < 0){
-	printf("ERROR: Failed to send file %s.\n", fs_name);
-      }
-      bzero(sdbuf, LENGTH);
+    FILE fs = fopen(fs_name, "r");
+    printf("\nFile Name Received: %s\n", sdbuf);
+    if (fs == NULL){
+    printf("\nFile open failed!\n");
+    }else{
+    printf("\nFile Successfully opened!\n");
     }
-      if (fs != NULL)
-	fclose(fs);
+    while((fs_block_sz = fread(sdbuf, sizeof(char), LENGTH, fs))>0){
+    if(sendto(sockfd, sdbuf, LENGTH, 0, (const struct sockaddr *) &cliaddr, len) < 0){
+    printf("ERROR: Failed to send file %s.\n", fs_name);
+    }
+    bzero(sdbuf, LENGTH);
+    }
+    if (fs != NULL)
+    fclose(fs);
       
     }
     printf("Ok sent to client!\n");
     close(sockfd);
     printf("[Server] Connection with Client closed. Server will wait now...\n");
     while(waitpid(-1, NULL, WNOHANG) > 0);
-  }
-  return 0;*/
+    }*/
+  return 0;
 }
 
 int TCP(int port) 
@@ -237,24 +246,24 @@ int TCP(int port)
 }
 
 void func(int sockfd){ 
-    if(!fork()) { //Change fs_name to that of http request file name 
-        char* fs_name = "lab2.html";
-        char sdbuf[LENGTH]; // Send buffer
-        printf("[Server] Sending %s to Client...", fs_name);
-        FILE *fs = fopen(fs_name, "r");
-        if(fs == NULL){
-	          printf("ERROR: 404 Not Found.\n");
-	          exit(1);
-        }
+  if(!fork()) { //Change fs_name to that of http request file name 
+    char* fs_name = "lab2.html";
+    char sdbuf[LENGTH]; // Send buffer
+    printf("[Server] Sending %s to Client...", fs_name);
+    FILE *fs = fopen(fs_name, "r");
+    if(fs == NULL){
+      printf("ERROR: 404 Not Found.\n");
+      exit(1);
+    }
 
-        bzero(sdbuf, LENGTH); 
-        int fs_block_sz; 
-        while((fs_block_sz = fread(sdbuf, sizeof(char), LENGTH, fs))>0){
-	          if(send(sockfd, sdbuf, fs_block_sz, 0) < 0){
-	              printf("ERROR: Failed to send file %s.", fs_name);
-	              exit(1);
-	      }
-	      bzero(sdbuf, LENGTH);
+    bzero(sdbuf, LENGTH); 
+    int fs_block_sz; 
+    while((fs_block_sz = fread(sdbuf, sizeof(char), LENGTH, fs))>0){
+      if(send(sockfd, sdbuf, fs_block_sz, 0) < 0){
+	printf("ERROR: Failed to send file %s.", fs_name);
+	exit(1);
+      }
+      bzero(sdbuf, LENGTH);
     }
     printf("Ok sent to client!\n");
     close(sockfd);
