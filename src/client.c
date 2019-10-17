@@ -69,9 +69,6 @@ int UDP(int port, char* address) {
       
     int n, len; 
       
-    sendto(sockfd, (const char* )hello, strlen(hello), 
-        0, (const struct sockaddr*) &servaddr,  
-            sizeof(servaddr)); 
           
     //n = recvfrom(sockfd, (char*)buffer, MAXLINE,  
     //            MSG_WAITALL, (struct sockaddr*) &servaddr, 
@@ -85,11 +82,14 @@ int UDP(int port, char* address) {
     if (sockfd < 0) 
         printf("\nfile descriptor not received!!\n"); 
     else
-        printf("\nfile descriptor %d received\n", sockfd); 
-  
+        printf("\nfile descriptor %d received\n", sockfd);
+    
+  sendto(sockfd, (const char* )hello, strlen(hello), 
+        0, (const struct sockaddr*) &servaddr,  
+            sizeof(servaddr)); 
     while (1) { 
         printf("\n---------Data Received---------\n"); 
-  
+
         while (1) { 
             // receive 
             for (i = 0; i < MAXLINE; i++) 
