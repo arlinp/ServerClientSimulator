@@ -2,11 +2,11 @@
 #include <stdio.h> 
 #include <stdlib.h> 
 #include <string.h> 
-#include <sys/socket.h> 
-#include <unistd.h> 
 #include <sys/types.h> 
 #include <arpa/inet.h> 
-#include <netinet/in.h> 
+#include <netinet/in.h>
+#include <sys/socket.h> 
+#include <unistd.h> 
 
 #define LENGTH 64
 #define MAXLINE 1024 
@@ -48,16 +48,16 @@ int main(int argc, char *argv[]) {
 }
 
 int UDP(int port, char* address) { 
-    int sockfd; 
+    int sockfd, i; 
     char buffer[MAXLINE]; 
     char* hello = "Client is connected."; 
     struct sockaddr_in     servaddr; 
   
     // Creating socket file descriptor 
-    if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0 ) { 
-        perror("Error: 404 Not Found."); 
-        exit(EXIT_FAILURE); 
-    } 
+   // if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0 ) { 
+    //    perror("Error: 404 Not Found."); 
+    //    exit(EXIT_FAILURE); 
+    //} 
   
     memset(&servaddr, 0, sizeof(servaddr)); 
       
@@ -69,17 +69,45 @@ int UDP(int port, char* address) {
     int n, len; 
       
     sendto(sockfd, (const char* )hello, strlen(hello), 
-        MSG_CONFIRM, (const struct sockaddr*) &servaddr,  
+        0, (const struct sockaddr*) &servaddr,  
             sizeof(servaddr)); 
           
-    n = recvfrom(sockfd, (char*)buffer, MAXLINE,  
-                MSG_WAITALL, (struct sockaddr*) &servaddr, 
-                &len); 
+    //n = recvfrom(sockfd, (char*)buffer, MAXLINE,  
+    //            MSG_WAITALL, (struct sockaddr*) &servaddr, 
+    //            &len); 
     buffer[n] = '\0'; 
     printf("From Server : %s\n", buffer); 
+
+        // socket() 
+    sockfd = socket(AF_INET, SOCK_DGRAM, 
+                    IP_PROTOCOL); 
   
-    close(sockfd); 
-    return 0; 
+    if (sockfd < 0) 
+        printf("\nfile descriptor not received!!\n"); 
+    else
+        printf("\nfile descriptor %d received\n", sockfd); 
+  
+    while (1) { 
+        printf("\n---------Data Received---------\n"); 
+  
+        while (1) { 
+            // receive 
+            for (i = 0; i < MAXLINE; i++) 
+                buffer[i] = '\0'; 
+            n = recvfrom(sockfd, buffer, MAXLINE, 
+                              0, (struct sockaddr*) &servaddr, 
+                              &len);
+            printf("%s", buffer);
+  
+            // process 
+            if (recvFile(buffer, MAXLINE)) { 
+                break; 
+            } 
+        } 
+        printf("\n-------------------------------\n"); 
+    } 
+    close(sockfd);
+    return 0;  
 } 
 
 int func(int sockfd) 
