@@ -38,17 +38,17 @@ int main(int argc, char *argv[])
 
 int UDP(int port) {
 
-  /*int sockfd, nBytes; 
+  int sockfd, nBytes; 
     struct sockaddr_in addr_con; 
     int addrlen = sizeof(addr_con); 
     addr_con.sin_family = AF_INET; 
-    addr_con.sin_port = htons(PORT_NO); 
+    addr_con.sin_port = htons(port); 
     addr_con.sin_addr.s_addr = INADDR_ANY; 
-    char net_buf[NET_BUF_SIZE]; 
+    char net_buf[LENGTH]; 
     FILE* fp; 
   
     // socket() 
-    sockfd = socket(AF_INET, SOCK_DGRAM, IP_PROTOCOL); 
+    sockfd = socket(AF_INET, SOCK_DGRAM, 0); 
   
     if (sockfd < 0) 
         printf("\nfile descriptor not received!!\n"); 
@@ -65,14 +65,14 @@ int UDP(int port) {
         printf("\nWaiting for file name...\n"); 
   
         // receive file name 
-        clearBuf(net_buf); 
+        bzero(sdbuf, LENGTH);
   
-        nBytes = recvfrom(sockfd, net_buf, 
-                          NET_BUF_SIZE, sendrecvflag, 
+        nBytes = recvfrom(sockfd, sdbuf, 
+                          LENGTH, 0, 
                           (struct sockaddr*)&addr_con, &addrlen); 
   
-        fp = fopen(net_buf, "r"); 
-        printf("\nFile Name Received: %s\n", net_buf); 
+        fp = fopen(sdbuf, "r"); 
+        printf("\nFile Name Received: %s\n", sdbuf); 
         if (fp == NULL) 
             printf("\nFile open failed!\n"); 
         else
@@ -81,25 +81,25 @@ int UDP(int port) {
         while (1) { 
   
             // process 
-            if (sendFile(fp, net_buf, NET_BUF_SIZE)) { 
-                sendto(sockfd, net_buf, NET_BUF_SIZE, 
+            if (sendFile(fp, sdbuf, LENGTH)) { 
+                sendto(sockfd, sdbuf, LENGTH, 
                        sendrecvflag,  
                     (struct sockaddr*)&addr_con, addrlen); 
                 break; 
             } 
   
             // send 
-            sendto(sockfd, net_buf, NET_BUF_SIZE, 
+            sendto(sockfd, sdbuf, LENGTH, 
                    sendrecvflag, 
                 (struct sockaddr*)&addr_con, addrlen); 
-            clearBuf(net_buf); 
+            clearBuf(sdbuf); 
         } 
         if (fp != NULL) 
             fclose(fp); 
     } 
-    return 0; */
+    return 0; 
   
-  int sockfd;
+  /*int sockfd;
   char buffer[LENGTH]; 
   char *hello = "Hello from server"; 
   struct sockaddr_in servaddr, cliaddr;
@@ -139,14 +139,14 @@ int UDP(int port) {
     /*if(fs == NULL){
       printf("ERROR: 404 Not Found.\n");
       exit(1);
-      }*/
+      }
 
     bzero(sdbuf, LENGTH);
     int fs_block_sz, nBytes;
     int n;
     /*n = recvfrom(sockfd, (char *)buffer, LENGTH,
     		 0, ( struct sockaddr *) &cliaddr,
-		 &len);*/
+		 &len);
     while(1){
       printf("\nWaiting for file name...\n");
 
@@ -179,7 +179,7 @@ int UDP(int port) {
     printf("[Server] Connection with Client closed. Server will wait now...\n");
     while(waitpid(-1, NULL, WNOHANG) > 0);
   }
-  return 0;
+  return 0;*/
 }
 
 int TCP(int port) 
