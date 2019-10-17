@@ -1,3 +1,4 @@
+#include <unistd.h> 
 #include <netdb.h> 
 #include <stdio.h> 
 #include <stdlib.h> 
@@ -6,7 +7,6 @@
 #include <arpa/inet.h> 
 #include <netinet/in.h>
 #include <sys/socket.h> 
-#include <unistd.h> 
 
 #define LENGTH 64
 #define MAXLINE 1024 
@@ -51,7 +51,8 @@ int UDP(int port, char* address) {
     int sockfd, i; 
     char buffer[MAXLINE]; 
     char* hello = "Client is connected."; 
-    struct sockaddr_in     servaddr; 
+    struct sockaddr_in     servaddr, cliaddr; 
+    bzero(&servaddr, sizeof(servaddr)); 
   
     // Creating socket file descriptor 
    // if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0 ) { 
@@ -79,8 +80,7 @@ int UDP(int port, char* address) {
     printf("From Server : %s\n", buffer); 
 
         // socket() 
-    sockfd = socket(AF_INET, SOCK_DGRAM, 
-                    IP_PROTOCOL); 
+    sockfd = socket(AF_INET, SOCK_DGRAM, 0); 
   
     if (sockfd < 0) 
         printf("\nfile descriptor not received!!\n"); 
@@ -94,9 +94,9 @@ int UDP(int port, char* address) {
             // receive 
             for (i = 0; i < MAXLINE; i++) 
                 buffer[i] = '\0'; 
-            n = recvfrom(sockfd, buffer, MAXLINE, 
-                              0, (struct sockaddr*) &servaddr, 
-                              &len);
+            int n = recvfrom(sockfd, (char*)buffer, MAXLINE,  
+                MSG_WAITALL, (struct sockaddr*) &servaddr, 
+                &len); 
             printf("%s", buffer);
   
             // process 
@@ -143,7 +143,8 @@ int TCP(int port, char* address)
 { 
     printf("%s\n", address);
     int sockfd, connfd; 
-    struct sockaddr_in servaddr, cli; 
+    struct sockaddr_in servaddr, cli;
+
   
     // socket create and varification 
     sockfd = socket(AF_INET, SOCK_STREAM, 0); 
