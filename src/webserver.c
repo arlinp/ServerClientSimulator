@@ -37,11 +37,12 @@ int main(int argc, char *argv[])
 }
 
 int UDP(int port) { 
-  int sockfd; 
+  int sockfd;
   char buffer[LENGTH]; 
   char *hello = "Hello from server"; 
-  struct sockaddr_in servaddr, cliaddr; 
-
+  struct sockaddr_in servaddr, cliaddr;
+  int len = sizeof(servaddr);
+  
   // Creating socket file descriptor 
   if ( (sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0 ) { 
     perror("socket creation failed"); 
@@ -72,31 +73,51 @@ int UDP(int port) {
     char* fs_name = "lab2.html";
     char sdbuf[LENGTH];
     printf("[Server] Sending %s to Client...", fs_name);
-    FILE *fs = fopen(fs_name, "r");
-    if(fs == NULL){
+    //FILE *fs = fopen(fs_name, "r");
+    /*if(fs == NULL){
       printf("ERROR: 404 Not Found.\n");
       exit(1);
-    }
+      }*/
 
     bzero(sdbuf, LENGTH);
-    int fs_block_sz;
-    int len, n;
+    int fs_block_sz, nBytes;
+    int n;
     /*n = recvfrom(sockfd, (char *)buffer, LENGTH,
     		 0, ( struct sockaddr *) &cliaddr,
 		 &len);*/
-    while((fs_block_sz = fread(sdbuf, sizeof(char), LENGTH, fs))>0){
-      if((sendto(sockfd, sdbuf, LENGTH, 0, (const struct sockaddr *) &cliaddr, len) &&recvfrom(sockfd, (char *)buffer, LENGTH,
-											       0, ( struct sockaddr *) &cliaddr,
-											       &len))< 0){
+    while(1){
+      printf("\nWaiting for file name...\n");
+
+      // receive file name
+      bzero(sdbuf, LENGTH);
+      
+      nBytes = recvfrom(sockfd, sdbuf,
+			LENGTH, 0,
+			(const struct sockaddr*)&cliaddr, &len);
+
+      FILE fs = fopen(fs_name, "r");
+      printf("\nFile Name Received: %s\n", sdbuf);
+      if (fs == NULL){
+	printf("\nFile open failed!\n");
+      }else{
+	printf("\nFile Successfully opened!\n");
+      }
+      while((fs_block_sz = fread(sdbuf, sizeof(char), LENGTH, fs))>0){
+      if(sendto(sockfd, sdbuf, LENGTH, 0, (const struct sockaddr *) &cliaddr, len) < 0){
 	printf("ERROR: Failed to send file %s.\n", fs_name);
       }
       bzero(sdbuf, LENGTH);
+    }
+      if (fs != NULL)
+	fclose(fs);
+      
     }
     printf("Ok sent to client!\n");
     close(sockfd);
     printf("[Server] Connection with Client closed. Server will wait now...\n");
     while(waitpid(-1, NULL, WNOHANG) > 0);
   }
+  return 0;
 }
 
 int TCP(int port) 
