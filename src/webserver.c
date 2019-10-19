@@ -1,5 +1,6 @@
 #include <arpa/inet.h>
-#include <ctype.h> 
+#include <ctype.h>
+#include <math.h>
 #include <netdb.h> 
 #include <netinet/in.h>
 #include <signal.h>
@@ -165,7 +166,13 @@ void func(int sockfd){
     }
 
     bzero(sdbuf, LENGTH); 
-    int fs_block_sz; 
+    int fs_block_sz;
+    long s = sizeof(*fs);
+    s = (s / LENGTH) + 1;
+    printf("# packets = %ld\n", s);
+    /*if(send(sockfd, "exit", sizeof("exit") + 1, 0) < 0) {
+      printf("ERROR: Failed to send exit,\n");
+      }*/
     while((fs_block_sz = fread(sdbuf, sizeof(char), LENGTH, fs))>0){
       if(send(sockfd, sdbuf, fs_block_sz, 0) < 0){
 	printf("ERROR: Failed to send file %s.", fs_name);
@@ -174,6 +181,12 @@ void func(int sockfd){
       bzero(sdbuf, LENGTH);
     }
     printf("Ok sent to client!\n");
+    bzero(sdbuf, LENGTH);
+    strcpy(sdbuf, "exit");
+    if(send(sockfd, sdbuf, LENGTH, 0) < 0){
+	printf("ERROR: Failed to send file %s.", fs_name);
+	exit(1);
+      }
     close(sockfd);
     printf("[Server] Connection with Client closed. Server will wait now...\n");
     while(waitpid(-1, NULL, WNOHANG) > 0);

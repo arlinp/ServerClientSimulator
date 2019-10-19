@@ -125,14 +125,14 @@ int func(int sockfd)
         //     ; 
         //write(sockfd, buff, sizeof(buff)); 
         
-        read(sockfd, buff, LENGTH);
-	
+      if(!recv(sockfd, buff, sizeof(buff) - 1, 0)) {
+	break;
+      }	
 	 
         //fwrite(buff, sizeof(buff), 1, temp);
         buff[LENGTH] = 0;
 	    printf("%s", buff);
-        if ((strncmp(buff, "exit", 4)) == 0) { 
-            printf("Client Exit...\n"); 
+        if ((strncmp(buff, "exit", 4)) == 0) {
             break; 
         } 
     }
@@ -175,6 +175,6 @@ int TCP(int port, char* address)
   
     // close the socket 
     close(sockfd); 
-    printf("Client connection lost.\n");
+    printf("Client connection closed.\n");
     return (0);
 }
