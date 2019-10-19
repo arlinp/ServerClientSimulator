@@ -101,6 +101,9 @@ int UDP(int port, char* address) {
             if (n == 0){
                 goto exit;
             }
+	    if ((strncmp(buffer, "exit", 4)) == 0) {
+	      goto exit; 
+	    } 
             printf("%s", buffer);
         } 
         printf("\n-------------------------------\n"); 

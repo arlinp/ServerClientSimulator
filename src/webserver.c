@@ -91,6 +91,12 @@ int UDP(int port) {
 	}
 	bzero(sdbuf, LENGTH);
       }
+      bzero(sdbuf, LENGTH);
+      strcpy(sdbuf, "exit");
+      if(sendto(sockfd, sdbuf, LENGTH, 0, (struct sockaddr*)&addr_con, addrlen) < 0){
+	printf("ERROR: Failed to send message.\n");
+	exit(1);
+      }
       while(waitpid(-1, NULL, WNOHANG) > 0);
     }
     printf("Ok sent to client!\n");
@@ -165,14 +171,8 @@ void func(int sockfd){
       exit(1);
     }
 
-    bzero(sdbuf, LENGTH); 
     int fs_block_sz;
-    long s = sizeof(*fs);
-    s = (s / LENGTH) + 1;
-    printf("# packets = %ld\n", s);
-    /*if(send(sockfd, "exit", sizeof("exit") + 1, 0) < 0) {
-      printf("ERROR: Failed to send exit,\n");
-      }*/
+    bzero(sdbuf, LENGTH); 
     while((fs_block_sz = fread(sdbuf, sizeof(char), LENGTH, fs))>0){
       if(send(sockfd, sdbuf, fs_block_sz, 0) < 0){
 	printf("ERROR: Failed to send file %s.", fs_name);
@@ -184,7 +184,7 @@ void func(int sockfd){
     bzero(sdbuf, LENGTH);
     strcpy(sdbuf, "exit");
     if(send(sockfd, sdbuf, LENGTH, 0) < 0){
-	printf("ERROR: Failed to send file %s.", fs_name);
+	printf("ERROR: Failed to send message.\n");
 	exit(1);
       }
     close(sockfd);
