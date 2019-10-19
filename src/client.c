@@ -59,7 +59,7 @@ int UDP(int port, char* address) {
     //    exit(EXIT_FAILURE); 
     //} 
   
-    memset(&servaddr, 0, sizeof(servaddr)); 
+    memset(&addr_con, 0, sizeof(addr_con)); 
       
     // Filling server information 
     addr_con.sin_family = AF_INET; 
@@ -89,7 +89,7 @@ int UDP(int port, char* address) {
 
         sendto(sockfd, (const char* )hello, strlen(hello), 
             0, (const struct sockaddr*) &addr_con,  
-            sizeof(sockaddr_in)); 
+            sizeof(addr_con)); 
 
         while (1) { 
             // receive 
