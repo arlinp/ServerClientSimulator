@@ -65,7 +65,7 @@ int UDP(int port, char* address) {
     // Filling server information 
     servaddr.sin_family = AF_INET; 
     servaddr.sin_port = htons(port); 
-    servaddr.sin_addr.s_addr = INADDR_ANY; 
+    servaddr.sin_addr.s_addr = inet_addr(address); 
       
     int n, len; 
       
