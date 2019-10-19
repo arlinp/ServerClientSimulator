@@ -83,7 +83,8 @@ int UDP(int port, char* address) {
         printf("\nfile descriptor not received!!\n"); 
     else
         printf("\nfile descriptor %d received\n", sockfd);
-    
+
+    exit:
     while (1) { 
         printf("\n---------Data Received---------\n"); 
 
@@ -98,10 +99,14 @@ int UDP(int port, char* address) {
             int n = recvfrom(sockfd, (char*)buffer, MAXLINE,  
                 MSG_WAITALL, (struct sockaddr*) &servaddr, 
                 &len); 
+            if (n == 0){
+                goto exit;
+            }
             printf("%s", buffer);
         } 
         printf("\n-------------------------------\n"); 
-    } 
+    }
+    exit:
     close(sockfd);
     return 0;  
 } 
