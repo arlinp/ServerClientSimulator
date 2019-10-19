@@ -52,7 +52,6 @@ int UDP(int port, char* address) {
     char buffer[MAXLINE]; 
     char* hello = "Client is connected."; 
     struct sockaddr_in addr_con; 
-    bzero(&addr_con, sizeof(sockaddr)); 
   
     // Creating socket file descriptor 
    // if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0 ) { 
@@ -65,7 +64,8 @@ int UDP(int port, char* address) {
     // Filling server information 
     addr_con.sin_family = AF_INET; 
     addr_con.sin_port = htons(port); 
-    addr_con.sin_addr.s_addr = inet_addr(IP_ADDRESS); 
+    addr_con.sin_addr.s_addr = inet_addr(address);
+    bzero(&addr_con, sizeof(addr_con)); 
       
     int n, len; 
       
@@ -88,15 +88,15 @@ int UDP(int port, char* address) {
         printf("\n---------Data Received---------\n");
 
         sendto(sockfd, (const char* )hello, strlen(hello), 
-            sendrecvflag, (const struct sockaddr*) &addr_con,  
-            sizeof(servaddr)); 
+            0, (const struct sockaddr*) &addr_con,  
+            sizeof(sockaddr_in)); 
 
         while (1) { 
             // receive 
             for (i = 0; i < MAXLINE; i++) 
                 buffer[i] = '\0'; 
             int n = recvfrom(sockfd, (char*)buffer, MAXLINE,  
-                sendrecvflag, (struct sockaddr*)&addr_con, 
+                0, (struct sockaddr*)&addr_con, 
                 &len); 
             printf("%s", buffer);
         } 
