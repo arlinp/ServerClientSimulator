@@ -57,7 +57,7 @@ int UDP(int port) {
   }
   
   // bind() 
-  if (bind(sockfd, (struct sockaddr*)&addr_con, sizeof(addr_con)) == 0) {
+  if (bind(sockfd, (struct sockaddr*)&addr_con, sizeof(addr_con)) < 0) {
     printf("\nSuccessfully binded!\n"); 
   } else {
     printf("\nBinding Failed!\n");
@@ -65,32 +65,35 @@ int UDP(int port) {
 
   printf("\nWaiting for file name...\n"); 
   
-  // receive file name 
-  bzero(sdbuf, LENGTH);
-  
-  nBytes = recvfrom(sockfd, sdbuf, 
-		    LENGTH, 0, 
-		    (struct sockaddr*)&addr_con, &addrlen); 
-  
-  char* fs_name = "lab2.html";
-  printf("\nFile Name Received: %s\n", sdbuf);
-  FILE *fs = fopen(fs_name, "r");
-  if (fp == NULL) {
-    printf("\nFile open failed!\n"); 
-  } else {
-    printf("\nFile Successfully opened!\n");
-  }
-  
-  int fs_block_sz; 
-  while((fs_block_sz = fread(sdbuf, sizeof(char), LENGTH, fs))>0){
-    if(sendto(sockfd, sdbuf, LENGTH, 0, (struct sockaddr*)&addr_con, addrlen) < 0){
-      printf("ERROR: Failed to send file %s.\n", fs_name);
-      exit(1);
-    }
+  // receive file name
+  for (;;) {
     bzero(sdbuf, LENGTH);
+  
+    nBytes = recvfrom(sockfd, sdbuf, 
+		      LENGTH, 0, 
+		      (struct sockaddr*)&addr_con, &addrlen); 
+    if(!fork()) {
+      char* fs_name = "lab2.html";
+      printf("\nFile Name Received: %s\n", sdbuf);
+      FILE *fs = fopen(fs_name, "r");
+      if (fp == NULL) {
+	printf("\nFile open failed!\n"); 
+      } else {
+	printf("\nFile Successfully opened!\n");
+      }
+  
+      int fs_block_sz; 
+      while((fs_block_sz = fread(sdbuf, sizeof(char), LENGTH, fs))>0){
+	if(sendto(sockfd, sdbuf, LENGTH, 0, (struct sockaddr*)&addr_con, addrlen) < 0){
+	  printf("ERROR: Failed to send file %s.\n", fs_name);
+	  exit(1);
+	}
+	bzero(sdbuf, LENGTH);
+      }
+      while(waitpid(-1, NULL, WNOHANG) > 0);
+    }
+    printf("Ok sent to client!\n");
   }
-
-  printf("Ok sent to client!\n");
   close(sockfd);
   return 0;
 }
@@ -146,7 +149,8 @@ int TCP(int port)
     func(connfd); 
   }
   // After chatting close the socket 
-  close(sockfd); 
+  close(sockfd);
+  return 0;
 }
 
 void func(int sockfd){ 
