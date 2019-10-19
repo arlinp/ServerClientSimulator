@@ -51,8 +51,8 @@ int UDP(int port, char* address) {
     int sockfd, i; 
     char buffer[MAXLINE]; 
     char* hello = "Client is connected."; 
-    struct sockaddr_in     servaddr, cliaddr; 
-    bzero(&servaddr, sizeof(servaddr)); 
+    struct sockaddr_in addr_con; 
+    bzero(&addr_con, sizeof(sockaddr)); 
   
     // Creating socket file descriptor 
    // if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0 ) { 
@@ -63,9 +63,9 @@ int UDP(int port, char* address) {
     memset(&servaddr, 0, sizeof(servaddr)); 
       
     // Filling server information 
-    servaddr.sin_family = AF_INET; 
-    servaddr.sin_port = htons(port); 
-    servaddr.sin_addr.s_addr = INADDR_ANY; 
+    addr_con.sin_family = AF_INET; 
+    addr_con.sin_port = htons(port); 
+    addr_con.sin_addr.s_addr = inet_addr(IP_ADDRESS); 
       
     int n, len; 
       
@@ -83,12 +83,12 @@ int UDP(int port, char* address) {
         printf("\nfile descriptor not received!!\n"); 
     else
         printf("\nfile descriptor %d received\n", sockfd);
-    
+
     while (1) { 
-        printf("\n---------Data Received---------\n"); 
+        printf("\n---------Data Received---------\n");
 
         sendto(sockfd, (const char* )hello, strlen(hello), 
-        0, (const struct sockaddr*) &servaddr,  
+            sendrecvflag, (const struct sockaddr*) &addr_con,  
             sizeof(servaddr)); 
 
         while (1) { 
@@ -96,7 +96,7 @@ int UDP(int port, char* address) {
             for (i = 0; i < MAXLINE; i++) 
                 buffer[i] = '\0'; 
             int n = recvfrom(sockfd, (char*)buffer, MAXLINE,  
-                MSG_WAITALL, (struct sockaddr*) &servaddr, 
+                sendrecvflag, (struct sockaddr*)&addr_con, 
                 &len); 
             printf("%s", buffer);
         } 
