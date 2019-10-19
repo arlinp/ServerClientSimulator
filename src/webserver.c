@@ -173,7 +173,6 @@ void func(int sockfd){
       }
       bzero(sdbuf, LENGTH);
     }
-    //send(sockfd, "exit", sizeof("exit"), 0);
     printf("Ok sent to client!\n");
     close(sockfd);
     printf("[Server] Connection with Client closed. Server will wait now...\n");
