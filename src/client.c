@@ -84,11 +84,12 @@ int UDP(int port, char* address) {
     else
         printf("\nfile descriptor %d received\n", sockfd);
     
-  sendto(sockfd, (const char* )hello, strlen(hello), 
-        0, (const struct sockaddr*) &servaddr,  
-            sizeof(servaddr)); 
     while (1) { 
         printf("\n---------Data Received---------\n"); 
+
+        sendto(sockfd, (const char* )hello, strlen(hello), 
+        0, (const struct sockaddr*) &servaddr,  
+            sizeof(servaddr)); 
 
         while (1) { 
             // receive 
