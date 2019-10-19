@@ -58,8 +58,6 @@ int UDP(int port, char* address) {
     //    perror("Error: 404 Not Found."); 
     //    exit(EXIT_FAILURE); 
     //} 
-  
-    memset(&addr_con, 0, sizeof(addr_con)); 
       
     // Filling server information 
     addr_con.sin_family = AF_INET; 
@@ -69,15 +67,11 @@ int UDP(int port, char* address) {
       
     int n, len; 
       
-          
-    //n = recvfrom(sockfd, (char*)buffer, MAXLINE,  
-    //            MSG_WAITALL, (struct sockaddr*) &servaddr, 
-    //            &len); 
     buffer[n] = '\0'; 
     printf("From Server : %s\n", buffer); 
 
         // socket() 
-    sockfd = socket(AF_INET, SOCK_DGRAM, 0); 
+    sockfd = socket(AF_INET, SOCK_DGRAM, IP_PROTOCOL); 
   
     if (sockfd < 0) 
         printf("\nfile descriptor not received!!\n"); 
