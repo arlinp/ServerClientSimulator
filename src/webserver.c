@@ -58,9 +58,9 @@ int UDP(int port) {
   
   // bind() 
   if (bind(sockfd, (struct sockaddr*)&addr_con, sizeof(addr_con)) < 0) {
-    printf("\nBinding Failed!\n");
+    printf("\nSuccessfully binded!\n"); 
   } else {
-    printf("\nSuccessfully binded!\n");
+    printf("\nBinding Failed!\n");
   }
 
   printf("\nWaiting for file name...\n"); 
