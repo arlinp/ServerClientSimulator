@@ -84,7 +84,6 @@ int UDP(int port, char* address) {
     else
         printf("\nfile descriptor %d received\n", sockfd);
 
-    exit:
     while (1) { 
         printf("\n---------Data Received---------\n"); 
 
