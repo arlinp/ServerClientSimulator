@@ -182,7 +182,6 @@ void func(int sockfd){
     }
     printf("Ok sent to client!\n");
     bzero(sdbuf, LENGTH);
-    strcpy(sdbuf, "exit");
     if(send(sockfd, sdbuf, LENGTH, 0) < 0){
 	printf("ERROR: Failed to send message.\n");
 	exit(1);
