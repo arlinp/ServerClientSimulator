@@ -33,7 +33,6 @@ int main(int argc, char *argv[]) {
     strcpy(URL, argv[1]);
     strcpy(connType, argv[2]);
   }
-  // if (argc == 3) {
     int i = 0;
     int port;
     char *p = strtok (URL, ":");
@@ -66,12 +65,6 @@ int UDP(int port, char* address) {
     struct sockaddr_in     servaddr, cliaddr; 
     bzero(&servaddr, sizeof(servaddr)); 
   
-    // Creating socket file descriptor 
-   // if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0 ) { 
-    //    perror("Error: 404 Not Found."); 
-    //    exit(EXIT_FAILURE); 
-    //} 
-  
     memset(&servaddr, 0, sizeof(servaddr)); 
       
     // Filling server information 
@@ -80,15 +73,11 @@ int UDP(int port, char* address) {
     servaddr.sin_addr.s_addr = inet_addr(address); 
       
     int n, len; 
-      
-          
-    //n = recvfrom(sockfd, (char*)buffer, MAXLINE,  
-    //            MSG_WAITALL, (struct sockaddr*) &servaddr, 
-    //            &len); 
+ 
     buffer[n] = '\0'; 
     printf("From Server : %s\n", buffer); 
 
-        // socket() 
+    // socket() 
     sockfd = socket(AF_INET, SOCK_DGRAM, 0); 
   
     if (sockfd < 0) 
@@ -127,34 +116,25 @@ int UDP(int port, char* address) {
 
 int func(int sockfd) 
 {
-    char *end;
     char buff[LENGTH];
     char c;
     int n;
     printf("From Server : \n");
-    // bzero(buff, sizeof(buff));
+    
     for (;;) { 
-      bzero(buff, LENGTH); 
-        //printf("Enter the string : "); 
-        //n = 0; 
-        //while ((buff[n++] = getchar()) != '\n') 
-        //     ; 
-        //write(sockfd, buff, sizeof(buff)); 
-        
+      bzero(buff, LENGTH);
+      
       if(!recv(sockfd, buff, sizeof(buff) - 1, 0)) {
 	break;
       }	
-	 
-        //fwrite(buff, sizeof(buff), 1, temp);
-        buff[LENGTH] = 0;
-	    printf("%s", buff);
+
+      buff[LENGTH] = 0;
+      printf("%s", buff);
 	    
-	    if(buff[0] == 0){
-	      exit(0);
-	    }
-      
+      if(buff[0] == 0){
+        exit(0);
+      }
     }
-    
 }
   
 int TCP(int port, char* address) 
