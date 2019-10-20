@@ -12,39 +12,51 @@
 #define MAXLINE 1024 
 #define SA struct sockaddr
 
+char URL[20];
+char connType[3];
+
 int TCP(int port, char* address);
 int func(int sockfd);
 int UDP(int port, char* address);
+
   
 // Driver code 
 int main(int argc, char *argv[]) {
-  if (argc == 3) {
+    
+  if((argc == 2) &&
+     ( (strcmp(argv[1], "TCP") == 0) || (strcmp(argv[1], "UDP") == 0) ) ){
+    strcpy(connType, argv[1]);
+    printf("Please enter a URL: ");
+    scanf("%s", URL);
+  }
+  else{
+    strcpy(URL, argv[1]);
+    strcpy(connType, argv[2]);
+  }
+  // if (argc == 3) {
     int i = 0;
     int port;
-    char *p = strtok (argv[1], ":");
+    char *p = strtok (URL, ":");
     char *array[2];
 
     while (p != NULL)
     {
-        array[i++] = p;
-        p = strtok (NULL, ":");
+      array[i++] = p;
+      p = strtok (NULL, ":");
     }
     
     printf("%s\n", array[1]);
     port = atoi(array[1]);
 
-    if (strcmp(argv[2], "TCP") == 0) { 
+    if ((strcmp(connType, "TCP") == 0)) { 
       TCP(port, array[0]);
-    } else if (strcmp(argv[2], "UDP") == 0) { 
+    } else if (strcmp (connType, "UDP") == 0) { 
       UDP(port, array[0]);
     } else {
-      printf("Invalid transport protocol: Expected either TCP or UDP, found %s\n", argv[2]);
+      printf("Invalid transport protocol: Expected either TCP or UDP, found %s\n", connType);
       return 0;
     }
-  } else {
-    printf("Wrong number of arguments: Expected 2, found %d\n", argc - 1);
     return 0;
-  }
 }
 
 int UDP(int port, char* address) { 
@@ -114,7 +126,8 @@ int UDP(int port, char* address) {
 } 
 
 int func(int sockfd) 
-{ 
+{
+    char *end;
     char buff[LENGTH];
     char c;
     int n;
@@ -135,9 +148,11 @@ int func(int sockfd)
         //fwrite(buff, sizeof(buff), 1, temp);
         buff[LENGTH] = 0;
 	    printf("%s", buff);
-        if ((strncmp(buff, "exit", 4)) == 0) {
-            break; 
-        } 
+	    
+	    if(buff[0] == 0){
+	      exit(0);
+	    }
+      
     }
     
 }
