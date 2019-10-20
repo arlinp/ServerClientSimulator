@@ -10,6 +10,7 @@
 #include <sys/socket.h> 
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <time.h>
 #include <unistd.h>
  
 #define LENGTH 64
@@ -74,7 +75,10 @@ int UDP(int port) {
 		      LENGTH, 0, 
 		      (struct sockaddr*)&addr_con, &addrlen); 
     if(!fork()) {
+      clock_t t; 
+      t = clock();
       char* fs_name = "lab2.html";
+      FILE *f = fopen("udp_latency.csv", "a");
       printf("\nFile Name Received: %s\n", sdbuf);
       FILE *fs = fopen(fs_name, "r");
       if (fp == NULL) {
@@ -97,6 +101,10 @@ int UDP(int port) {
 	printf("ERROR: Failed to send message.\n");
 	exit(1);
       }
+      t = clock() - t; 
+      double time_taken = ((double)t)/CLOCKS_PER_SEC; // in seconds 
+      fprintf(f,"%f\n", time_taken);
+      fclose(f);
       while(waitpid(-1, NULL, WNOHANG) > 0);
     }
     printf("Ok sent to client!\n");
@@ -106,7 +114,7 @@ int UDP(int port) {
 }
 
 int TCP(int port) 
-{ 
+{
   int sockfd, connfd, len; 
   struct sockaddr_in servaddr, cli; 
   
@@ -152,8 +160,8 @@ int TCP(int port)
     else
       printf("server acccept the client...\n"); 
   
-    // Function for chatting between client and server 
-    func(connfd); 
+    // Function for chatting between client and server
+    func(connfd);
   }
   // After chatting close the socket 
   close(sockfd);
@@ -161,11 +169,14 @@ int TCP(int port)
 }
 
 void func(int sockfd){ 
-  if(!fork()) { //Change fs_name to that of http request file name 
+  if(!fork()) { 
+    clock_t t; 
+    t = clock();
     char* fs_name = "lab2.html";
     char sdbuf[LENGTH]; // Send buffer
     printf("[Server] Sending %s to Client...", fs_name);
     FILE *fs = fopen(fs_name, "r");
+    FILE *f = fopen("tcp_latency.csv", "a");
     if(fs == NULL){
       printf("ERROR: 404 Not Found.\n");
       exit(1);
@@ -188,6 +199,10 @@ void func(int sockfd){
       }
     close(sockfd);
     printf("[Server] Connection with Client closed. Server will wait now...\n");
+    t = clock() - t; 
+    double time_taken = ((double)t)/CLOCKS_PER_SEC; // in seconds 
+    fprintf(f,"%f\n", time_taken);
+    fclose(f);
     while(waitpid(-1, NULL, WNOHANG) > 0);
   }
 } 
