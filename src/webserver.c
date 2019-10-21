@@ -1,5 +1,6 @@
 #include <arpa/inet.h>
-#include <ctype.h> 
+#include <ctype.h>
+#include <math.h>
 #include <netdb.h> 
 #include <netinet/in.h>
 #include <signal.h>
@@ -9,6 +10,7 @@
 #include <sys/socket.h> 
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <time.h>
 #include <unistd.h>
  
 #define LENGTH 64
@@ -57,46 +59,62 @@ int UDP(int port) {
   }
   
   // bind() 
-  if (bind(sockfd, (struct sockaddr*)&addr_con, sizeof(addr_con)) == 0) {
-    printf("\nSuccessfully binded!\n"); 
+  if (bind(sockfd, (struct sockaddr*)&addr_con, sizeof(addr_con)) < 0) {
+     printf("\nBinding Failed!\n");
   } else {
-    printf("\nBinding Failed!\n");
+    printf("\nSuccessfully binded!\n");
   }
 
   printf("\nWaiting for file name...\n"); 
   
-  // receive file name 
-  bzero(sdbuf, LENGTH);
-  
-  nBytes = recvfrom(sockfd, sdbuf, 
-		    LENGTH, 0, 
-		    (struct sockaddr*)&addr_con, &addrlen); 
-  
-  char* fs_name = "lab2.html";
-  printf("\nFile Name Received: %s\n", sdbuf);
-  FILE *fs = fopen(fs_name, "r");
-  if (fp == NULL) {
-    printf("\nFile open failed!\n"); 
-  } else {
-    printf("\nFile Successfully opened!\n");
-  }
-  
-  int fs_block_sz; 
-  while((fs_block_sz = fread(sdbuf, sizeof(char), LENGTH, fs))>0){
-    if(sendto(sockfd, sdbuf, LENGTH, 0, (struct sockaddr*)&addr_con, addrlen) < 0){
-      printf("ERROR: Failed to send file %s.\n", fs_name);
-      exit(1);
-    }
+  // receive file name
+  for (;;) {
     bzero(sdbuf, LENGTH);
+  
+    nBytes = recvfrom(sockfd, sdbuf, 
+		      LENGTH, 0, 
+		      (struct sockaddr*)&addr_con, &addrlen); 
+    if(!fork()) {
+      clock_t t; 
+      t = clock();
+      char* fs_name = "lab2.html";
+      FILE *f = fopen("udp_latency.csv", "a");
+      printf("\nFile Name Received: %s\n", sdbuf);
+      FILE *fs = fopen(fs_name, "r");
+      if (fp == NULL) {
+	printf("\nFile open failed!\n"); 
+      } else {
+	printf("\nFile Successfully opened!\n");
+      }
+  
+      int fs_block_sz; 
+      while((fs_block_sz = fread(sdbuf, sizeof(char), LENGTH, fs))>0){
+	if(sendto(sockfd, sdbuf, LENGTH, 0, (struct sockaddr*)&addr_con, addrlen) < 0){
+	  printf("ERROR: Failed to send file %s.\n", fs_name);
+	  exit(1);
+	}
+	bzero(sdbuf, LENGTH);
+      }
+      bzero(sdbuf, LENGTH);
+      strcpy(sdbuf, "exit");
+      if(sendto(sockfd, sdbuf, LENGTH, 0, (struct sockaddr*)&addr_con, addrlen) < 0){
+	printf("ERROR: Failed to send message.\n");
+	exit(1);
+      }
+      t = clock() - t; 
+      double time_taken = ((double)t)/CLOCKS_PER_SEC; // in seconds 
+      fprintf(f,"%f\n", time_taken);
+      fclose(f);
+      while(waitpid(-1, NULL, WNOHANG) > 0);
+    }
+    printf("Ok sent to client!\n");
   }
-
-  printf("Ok sent to client!\n");
   close(sockfd);
   return 0;
 }
 
 int TCP(int port) 
-{ 
+{
   int sockfd, connfd, len; 
   struct sockaddr_in servaddr, cli; 
   
@@ -142,26 +160,30 @@ int TCP(int port)
     else
       printf("server acccept the client...\n"); 
   
-    // Function for chatting between client and server 
-    func(connfd); 
+    // Function for chatting between client and server
+    func(connfd);
   }
   // After chatting close the socket 
-  close(sockfd); 
+  close(sockfd);
+  return 0;
 }
 
 void func(int sockfd){ 
-  if(!fork()) { //Change fs_name to that of http request file name 
+  if(!fork()) { 
+    clock_t t; 
+    t = clock();
     char* fs_name = "lab2.html";
     char sdbuf[LENGTH]; // Send buffer
     printf("[Server] Sending %s to Client...", fs_name);
     FILE *fs = fopen(fs_name, "r");
+    FILE *f = fopen("tcp_latency.csv", "a");
     if(fs == NULL){
       printf("ERROR: 404 Not Found.\n");
       exit(1);
     }
 
+    int fs_block_sz;
     bzero(sdbuf, LENGTH); 
-    int fs_block_sz; 
     while((fs_block_sz = fread(sdbuf, sizeof(char), LENGTH, fs))>0){
       if(send(sockfd, sdbuf, fs_block_sz, 0) < 0){
 	printf("ERROR: Failed to send file %s.", fs_name);
@@ -170,8 +192,17 @@ void func(int sockfd){
       bzero(sdbuf, LENGTH);
     }
     printf("Ok sent to client!\n");
+    bzero(sdbuf, LENGTH);
+    if(send(sockfd, sdbuf, LENGTH, 0) < 0){
+	printf("ERROR: Failed to send message.\n");
+	exit(1);
+      }
     close(sockfd);
     printf("[Server] Connection with Client closed. Server will wait now...\n");
+    t = clock() - t; 
+    double time_taken = ((double)t)/CLOCKS_PER_SEC; // in seconds 
+    fprintf(f,"%f\n", time_taken);
+    fclose(f);
     while(waitpid(-1, NULL, WNOHANG) > 0);
   }
 } 

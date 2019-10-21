@@ -19,4 +19,4 @@ $(TARGET_2): $(TARGET_2).c
 	$(CC) $(CFLAGS) -o $(TARGET_2) $(TARGET_2).c
 
 clean:
-	$(RM) $(TARGET_1) $(TARGET_2)
+	$(RM) $(TARGET_1) $(TARGET_2) *.csv
