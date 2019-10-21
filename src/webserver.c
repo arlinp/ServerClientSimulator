@@ -85,7 +85,6 @@ int UDP(int port) {
     // Child process for sending HTML file
     if(!fork()) {
       clock_t t; 
-      t = clock();
       char* fs_name = "lab2.html";
       FILE *f = fopen("udp_latency.csv", "a");
       FILE *fs = fopen(fs_name, "r");
@@ -97,6 +96,7 @@ int UDP(int port) {
   
       int fs_block_sz;
       // Sends Datagrams
+      t = clock();
       while((fs_block_sz = fread(sdbuf, sizeof(char), LENGTH, fs))>0){
 	if(sendto(sockfd, sdbuf, LENGTH, 0, (struct sockaddr*)&addr_con, addrlen) < 0){
 	  printf("ERROR: Failed to send file %s.\n", fs_name);
@@ -104,6 +104,7 @@ int UDP(int port) {
 	}
 	bzero(sdbuf, LENGTH);
       }
+      t = clock() - t;
       // Notifies client that entire file has been sent
       bzero(sdbuf, LENGTH);
       strcpy(sdbuf, "exit");
@@ -111,8 +112,7 @@ int UDP(int port) {
 	printf("ERROR: Failed to send message.\n");
 	exit(1);
       }
-      // Time stamp in seconds for latency
-      t = clock() - t; 
+      // Time stamp in seconds for latency 
       double time_taken = ((double)t)/CLOCKS_PER_SEC; 
       fprintf(f,"%f\n", time_taken);
       fclose(f);
@@ -192,7 +192,6 @@ void dataStreamTCP(int sockfd){
   // Child process for sending HTML file
   if(!fork()) { 
     clock_t t; 
-    t = clock();
     char* fs_name = "lab2.html";
     char sdbuf[LENGTH]; // Send buffer
     printf("[Server] Sending %s to Client...", fs_name);
@@ -206,6 +205,7 @@ void dataStreamTCP(int sockfd){
     int fs_block_sz;
     bzero(sdbuf, LENGTH);
     // Sends Datagrams
+    t = clock();
     while((fs_block_sz = fread(sdbuf, sizeof(char), LENGTH, fs))>0){
       if(send(sockfd, sdbuf, fs_block_sz, 0) < 0){
 	printf("ERROR: Failed to send file %s.", fs_name);
@@ -213,6 +213,7 @@ void dataStreamTCP(int sockfd){
       }
       bzero(sdbuf, LENGTH);
     }
+    t = clock() - t; 
     printf("Ok sent to client!\n");
     bzero(sdbuf, LENGTH);
     // Notifies client that entire file has been sent
@@ -224,7 +225,6 @@ void dataStreamTCP(int sockfd){
     close(sockfd);
     printf("[Server] Connection with Client has been closed. Server waiting.\n");
     // Time stamp in seconds for latency
-    t = clock() - t; 
     double time_taken = ((double)t)/CLOCKS_PER_SEC;
     fprintf(f,"%f\n", time_taken);
     fclose(f);
