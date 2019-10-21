@@ -159,7 +159,7 @@ int TCP(int port)
   }
   
   // Server listening
-  if ((listen(sockfd, 5)) != 0) { 
+  if ((listen(sockfd, 10000)) != 0) { 
     printf("Listen failed...\n"); 
     exit(0); 
   } 
