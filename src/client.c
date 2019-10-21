@@ -8,6 +8,7 @@
 #include <netinet/in.h>
 #include <sys/socket.h> 
 
+//length is the length in bytes of the buffer.
 #define LENGTH 64
 #define MAXLINE 1024 
 #define SA struct sockaddr
@@ -20,7 +21,8 @@ int func(int sockfd);
 int UDP(int port, char* address);
 
   
-// Driver code 
+// Main accepts the input arguments and determines which function should run, 
+//  either TCP or UDP.  It parses the string indicating the address and port.
 int main(int argc, char *argv[]) {
     
   if((argc == 2) &&
@@ -58,12 +60,15 @@ int main(int argc, char *argv[]) {
     return 0;
 }
 
+// Function controlling UDP connection.
+// It accepts the port and parsed address.
 int UDP(int port, char* address) { 
     int sockfd, i; 
     char buffer[MAXLINE]; 
     char* hello = "Client is connected."; 
-    struct sockaddr_in     servaddr, cliaddr; 
+    struct sockaddr_in servaddr, cliaddr; 
     bzero(&servaddr, sizeof(servaddr)); 
+    int n, len;
   
     memset(&servaddr, 0, sizeof(servaddr)); 
       
@@ -71,8 +76,6 @@ int UDP(int port, char* address) {
     servaddr.sin_family = AF_INET; 
     servaddr.sin_port = htons(port); 
     servaddr.sin_addr.s_addr = inet_addr(address); 
-      
-    int n, len; 
  
     buffer[n] = '\0'; 
     printf("From Server : %s\n", buffer); 
@@ -117,7 +120,7 @@ int UDP(int port, char* address) {
 // Function to print out information received from
 // server (HTML file contents)
 
-int func(int sockfd) 
+int helper(int sockfd) 
 {
     char buff[LENGTH];
     char c;
@@ -128,7 +131,7 @@ int func(int sockfd)
       bzero(buff, LENGTH);
       
       if(!recv(sockfd, buff, sizeof(buff) - 1, 0)) {
-	break;
+          break;
       }	
 
       buff[LENGTH] = 0;
@@ -147,7 +150,7 @@ int TCP(int port, char* address)
     struct sockaddr_in servaddr, cli;
 
   
-    // socket create and varification 
+    // socket creation
     sockfd = socket(AF_INET, SOCK_STREAM, 0); 
     if (sockfd == -1) { 
         printf("Error: Failed to establish socket.\n"); 
@@ -158,7 +161,7 @@ int TCP(int port, char* address)
 
     bzero(&servaddr, sizeof(servaddr)); 
   
-    // assign IP, PORT 
+    // assign information to the struct
     servaddr.sin_family = AF_INET; 
     servaddr.sin_addr.s_addr = inet_addr(address); 
     servaddr.sin_port = htons(port); 
@@ -171,8 +174,8 @@ int TCP(int port, char* address)
     else
         printf("Connected to the server..\n"); 
   
-    // function for chat 
-    func(sockfd); 
+    // calls the handler.
+    helper(sockfd); 
   
     // close the socket 
     close(sockfd); 
