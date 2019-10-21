@@ -114,6 +114,9 @@ int UDP(int port, char* address) {
     return 0;  
 } 
 
+// Function to print out information received from
+// server (HTML file contents)
+
 int func(int sockfd) 
 {
     char buff[LENGTH];
