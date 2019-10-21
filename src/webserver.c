@@ -12,15 +12,19 @@
 #include <sys/wait.h>
 #include <time.h>
 #include <unistd.h>
- 
+
+// LENGTH is the size of the packet
 #define LENGTH 64
 #define SA struct sockaddr 
 
 int UDP(int port);
 int TCP(int port);
-void func(int sockfd);
+void dataStreamTCP(int sockfd);
 
-// Driver function 
+/*********************************************************************
+ * Based on the users input runs either the UDP or the TCP
+ * Driver function
+ *********************************************************************/
 int main(int argc, char *argv[]) 
 {
   if (argc == 3) {
@@ -33,11 +37,17 @@ int main(int argc, char *argv[])
       return 0;
     }
   } else {
-    printf("Wrong number of arguments: Expected 2, found %d\n", argc - 1);
+    printf("Incorrect amount of arguments: Expected 2, found %d\n", argc - 1);
     return 0;
   }
 }
 
+/**************************************************************************
+ * UDP is connectionless therefore there is no handshaking.
+ * UDP provides an unreliable data transfer service meaning when a 
+ * process sends a message into a UDP socket it provides noguarantee that 
+ * the message reaches the  receiving  process.
+ **************************************************************************/
 int UDP(int port) {
 
   int sockfd, nBytes; 
@@ -49,37 +59,35 @@ int UDP(int port) {
   char sdbuf[LENGTH]; 
   FILE* fp; 
   
-  // socket() 
+  // socket creation
   sockfd = socket(AF_INET, SOCK_DGRAM, 0); 
   
   if (sockfd < 0) {
-    printf("\nfile descriptor not received!!\n");
+    printf("\nFile descriptor not received!!\n");
   } else {
-    printf("\nfile descriptor %d received\n", sockfd);
+    printf("\nFile descriptor %d received\n", sockfd);
   }
   
-  // bind() 
+  // binding socket
   if (bind(sockfd, (struct sockaddr*)&addr_con, sizeof(addr_con)) < 0) {
-     printf("\nBinding Failed!\n");
+    printf("\nBinding Failed!\n");
   } else {
-    printf("\nSuccessfully binded!\n");
+    printf("\nBinded Successfully!\n");
   }
-
-  printf("\nWaiting for file name...\n"); 
   
-  // receive file name
+  // Sending
   for (;;) {
     bzero(sdbuf, LENGTH);
   
     nBytes = recvfrom(sockfd, sdbuf, 
 		      LENGTH, 0, 
-		      (struct sockaddr*)&addr_con, &addrlen); 
+		      (struct sockaddr*)&addr_con, &addrlen);
+    // Child process for sending HTML file
     if(!fork()) {
       clock_t t; 
       t = clock();
       char* fs_name = "lab2.html";
       FILE *f = fopen("udp_latency.csv", "a");
-      printf("\nFile Name Received: %s\n", sdbuf);
       FILE *fs = fopen(fs_name, "r");
       if (fp == NULL) {
 	printf("\nFile open failed!\n"); 
@@ -87,7 +95,8 @@ int UDP(int port) {
 	printf("\nFile Successfully opened!\n");
       }
   
-      int fs_block_sz; 
+      int fs_block_sz;
+      // Sends Datagrams
       while((fs_block_sz = fread(sdbuf, sizeof(char), LENGTH, fs))>0){
 	if(sendto(sockfd, sdbuf, LENGTH, 0, (struct sockaddr*)&addr_con, addrlen) < 0){
 	  printf("ERROR: Failed to send file %s.\n", fs_name);
@@ -95,53 +104,61 @@ int UDP(int port) {
 	}
 	bzero(sdbuf, LENGTH);
       }
+      // Notifies client that entire file has been sent
       bzero(sdbuf, LENGTH);
       strcpy(sdbuf, "exit");
       if(sendto(sockfd, sdbuf, LENGTH, 0, (struct sockaddr*)&addr_con, addrlen) < 0){
 	printf("ERROR: Failed to send message.\n");
 	exit(1);
       }
+      // Time stamp in seconds for latency
       t = clock() - t; 
-      double time_taken = ((double)t)/CLOCKS_PER_SEC; // in seconds 
+      double time_taken = ((double)t)/CLOCKS_PER_SEC; 
       fprintf(f,"%f\n", time_taken);
       fclose(f);
       while(waitpid(-1, NULL, WNOHANG) > 0);
     }
-    printf("Ok sent to client!\n");
+    printf("Sent to client!\n");
   }
+  // Close Socket Connection
   close(sockfd);
   return 0;
 }
 
+/*********************************************************************
+ * TCP is connectionless therefore there is handshaking. The TCP 
+ * service model includes a connection-oriented service and a reliable 
+ * datatransfer service. 
+ *********************************************************************/
 int TCP(int port) 
 {
   int sockfd, connfd, len; 
   struct sockaddr_in servaddr, cli; 
   
-  // socket create and verification 
+  // socket creation
   sockfd = socket(AF_INET, SOCK_STREAM, 0); 
   if (sockfd == -1) { 
-    printf("socket creation failed...\n"); 
+    printf("Socket creation failed...\n"); 
     exit(0); 
-  } 
-  else
-    printf("Socket successfully created..\n"); 
+  } else {
+    printf("Socket has successfully created..\n");
+  }
   bzero(&servaddr, sizeof(servaddr)); 
   
-  // assign IP, PORT 
+  // IP and PORT 
   servaddr.sin_family = AF_INET; 
   servaddr.sin_addr.s_addr = htonl(INADDR_ANY); 
   servaddr.sin_port = htons(port); 
   
-  // Binding newly created socket to given IP and verification 
+  // Binding socket to port and IP
   if ((bind(sockfd, (SA*)&servaddr, sizeof(servaddr))) != 0) { 
-    printf("socket bind failed...\n"); 
+    printf("Socket bind failed...\n"); 
     exit(0); 
-  } 
-  else
-    printf("Socket successfully binded..\n"); 
+  } else {
+    printf("Socket has successfully binded..\n");
+  }
   
-  // Now server is ready to listen and verification 
+  // Server listening
   if ((listen(sockfd, 5)) != 0) { 
     printf("Listen failed...\n"); 
     exit(0); 
@@ -150,25 +167,29 @@ int TCP(int port)
     printf("Server listening..\n"); 
   len = sizeof(cli); 
   
-  // Accept the data packet from client and verification 
+  // Accept the data packet from client
   for(;;) {
     connfd = accept(sockfd, (SA*)&cli, &len); 
     if (connfd < 0) { 
-      printf("server acccept failed...\n"); 
+      printf("Server acccept failed...\n"); 
       exit(0); 
     } 
     else
-      printf("server acccept the client...\n"); 
+      printf("Server acccepted the client...\n"); 
   
-    // Function for chatting between client and server
-    func(connfd);
+    // Function for sending
+    dataStreamTCP(connfd);
   }
-  // After chatting close the socket 
+  // Close the socket 
   close(sockfd);
   return 0;
 }
 
-void func(int sockfd){ 
+/*********************************************************************
+ * Sends HTML file through TCP datastream
+ *********************************************************************/
+void dataStreamTCP(int sockfd){
+  // Child process for sending HTML file
   if(!fork()) { 
     clock_t t; 
     t = clock();
@@ -181,9 +202,10 @@ void func(int sockfd){
       printf("ERROR: 404 Not Found.\n");
       exit(1);
     }
-
+    
     int fs_block_sz;
-    bzero(sdbuf, LENGTH); 
+    bzero(sdbuf, LENGTH);
+    // Sends Datagrams
     while((fs_block_sz = fread(sdbuf, sizeof(char), LENGTH, fs))>0){
       if(send(sockfd, sdbuf, fs_block_sz, 0) < 0){
 	printf("ERROR: Failed to send file %s.", fs_name);
@@ -193,14 +215,17 @@ void func(int sockfd){
     }
     printf("Ok sent to client!\n");
     bzero(sdbuf, LENGTH);
+    // Notifies client that entire file has been sent
     if(send(sockfd, sdbuf, LENGTH, 0) < 0){
-	printf("ERROR: Failed to send message.\n");
-	exit(1);
-      }
+      printf("ERROR: Failed to send message.\n");
+      exit(1);
+    }
+    // close connection
     close(sockfd);
-    printf("[Server] Connection with Client closed. Server will wait now...\n");
+    printf("[Server] Connection with Client has been closed. Server waiting.\n");
+    // Time stamp in seconds for latency
     t = clock() - t; 
-    double time_taken = ((double)t)/CLOCKS_PER_SEC; // in seconds 
+    double time_taken = ((double)t)/CLOCKS_PER_SEC;
     fprintf(f,"%f\n", time_taken);
     fclose(f);
     while(waitpid(-1, NULL, WNOHANG) > 0);
