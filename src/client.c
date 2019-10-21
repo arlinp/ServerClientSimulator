@@ -17,7 +17,7 @@ char URL[20];
 char connType[3];
 
 int TCP(int port, char* address);
-int func(int sockfd);
+int helper(int sockfd);
 int UDP(int port, char* address);
 
   
@@ -84,12 +84,11 @@ int UDP(int port, char* address) {
     sockfd = socket(AF_INET, SOCK_DGRAM, 0); 
   
     if (sockfd < 0) 
-        printf("\nfile descriptor not received!!\n"); 
+        printf("\nFile descriptor not received!\n"); 
     else
-        printf("\nfile descriptor %d received\n", sockfd);
+        printf("\nFile descriptor %d received\n", sockfd);
 
     while (1) { 
-        printf("\n---------Data Received---------\n"); 
 
         sendto(sockfd, (const char* )hello, strlen(hello), 
         0, (const struct sockaddr*) &servaddr,  
@@ -110,7 +109,6 @@ int UDP(int port, char* address) {
 	    } 
             printf("%s", buffer);
         } 
-        printf("\n-------------------------------\n"); 
     }
     exit:
     close(sockfd);
